@@ -2,9 +2,32 @@ import Head from "next/head";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
+const ease = [0.43, 0.13, 0.23, 0.96];
+
+const pageVariants = {
+  initial: {
+    y: "50%",
+    opacity: 0,
+    transition: { ease, duration: 0.8, delay: 0.5 },
+  },
+  animate: {
+    y: "0%",
+    opacity: 1,
+    transition: { ease, duration: 0.5 },
+  },
+  exit: {
+    y: "50%",
+    opacity: 0,
+    transition: { ease, duration: 0.8, delay: 0.5 },
+  },
+};
+
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2">
+    <motion.div
+      variants={pageVariants}
+      className="flex flex-col items-center justify-center min-h-screen py-2"
+    >
       <Head>
         <title> Quiz App</title>
         <link rel="icon" href="/favicon.ico" />
@@ -54,6 +77,6 @@ export default function Home() {
           Made with ♥
         </a>
       </footer>
-    </div>
+    </motion.div>
   );
 }

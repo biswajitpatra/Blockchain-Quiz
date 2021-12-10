@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 function MyApp({ Component, pageProps, router }) {
   return (
-    <AnimatePresence initial={false}>
+    <AnimatePresence exitBeforeEnter>
       <motion.div
         initial="initial"
         animate="animate"

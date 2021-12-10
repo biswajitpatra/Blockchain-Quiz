@@ -7,10 +7,14 @@
     "deploy": "vercel"
   },
   "dependencies": {
+    "@heroicons/react": "^1.0.5",
     "framer-motion": "^5.4.3",
     "next": "latest",
     "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react-datetime-picker": "^3.4.3",
+    "react-dom": "^17.0.2",
+    "react-hook-form": "^7.21.0",
+    "tailwind-scrollbar-hide": "^1.1.6"
   },
   "devDependencies": {
     "autoprefixer": "^10.2.6",

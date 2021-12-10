@@ -1,4 +1,25 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
+
+const ease = [0.43, 0.13, 0.23, 0.96];
+
+const stepVariants = {
+  initial: {
+    y: "50%",
+    opacity: 0,
+    transition: { ease, duration: 0.8 },
+  },
+  animate: {
+    y: "0%",
+    opacity: 1,
+    transition: { ease, duration: 0.8 },
+  },
+  exit: {
+    y: "50%",
+    opacity: 0,
+    transition: { ease, duration: 0.8, delay: 0.5 },
+  },
+};
 
 export default function QuestionForm() {
   const [active, setActive] = useState(false);
@@ -18,7 +39,7 @@ export default function QuestionForm() {
   }
 
   return (
-    <div className="flex flex-col">
+    <motion.div variants={stepVariants} className="flex flex-col p-8">
       <button
         className="py-6 box-border appearance-none cursor-pointer focus:outline-none flex items-center justify-between"
         onClick={toggleAccordion}
@@ -33,10 +54,10 @@ export default function QuestionForm() {
       <div
         ref={contentSpace}
         style={{ maxHeight: `${height}` }}
-        className="overflow-auto transition-max-height duration-700 ease-in-out"
+        className="overflow-auto scrollbar-hide transition-max-height duration-700 ease-in-out"
       >
         <div className="pb-10">This is very good and amazing.</div>
       </div>
-    </div>
+    </motion.div>
   );
 }
