@@ -22,7 +22,7 @@ const stepVariants = {
   exit: {
     y: "50%",
     opacity: 0,
-    transition: { ease, duration: 0.8},
+    transition: { ease, duration: 0.8 },
   },
 };
 
@@ -86,7 +86,10 @@ export default function QuizDetailForm({ updateFormData }) {
             className="block text-gray-700 font-bold mb-2"
             htmlFor="datetime"
           >
-            Choose your Date and Time
+            Choose your Date and Time{" "}
+            <span className="text-red-600 font-normal text-xs">
+              ( This feature has not been implemented yet )
+            </span>
           </label>
           <Controller
             control={control}

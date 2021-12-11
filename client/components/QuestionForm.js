@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
 import { motion } from "framer-motion";
+import QuestionAccordian from "./QuestionAccordian";
+import { NO_OF_QUESTIONS } from "../config";
 
 const ease = [0.43, 0.13, 0.23, 0.96];
-
 const stepVariants = {
   initial: {
     y: "50%",
@@ -13,51 +14,58 @@ const stepVariants = {
     y: "0%",
     opacity: 1,
     transition: { ease, duration: 0.8 },
+    transition: {
+      staggerChildren: 0.5,
+    },
   },
   exit: {
     y: "50%",
     opacity: 0,
-    transition: { ease, duration: 0.8, delay: 0.5 },
+    transition: { ease, duration: 0.8, delay: 0.2 },
   },
 };
 
-export default function QuestionForm() {
-  const [active, setActive] = useState(false);
-  const [height, setHeight] = useState("0px");
-  const [rotate, setRotate] = useState("transform duration-700 ease");
-
-  const contentSpace = useRef(null);
-
-  function toggleAccordion() {
-    setActive(active === false ? true : false);
-    setHeight(active ? "0px" : `${contentSpace.current.scrollHeight}px`);
-    setRotate(
-      active
-        ? "transform duration-700 ease"
-        : "transform duration-700 ease rotate-180"
-    );
+export default function QuestionForm({ updateFormData }) {
+  const initialQuestions = [];
+  for (let i = 0; i < NO_OF_QUESTIONS; i++) {
+    initialQuestions.push({
+      question: "",
+      options: ["", "", "", ""],
+      correctOption: null,
+    });
   }
+  const { handleSubmit, control, register } = useForm({
+    defaultValues: {
+      questions: initialQuestions,
+    },
+  });
+  const { fields } = useFieldArray(
+    {
+      control,
+      name: "questions",
+    }
+  );
+
 
   return (
-    <motion.div variants={stepVariants} className="flex flex-col p-8">
-      <button
-        className="py-6 box-border appearance-none cursor-pointer focus:outline-none flex items-center justify-between"
-        onClick={toggleAccordion}
-      >
-        <p className="inline-block font-bold light">Check this out </p>
-        <img
-          src="https://img.icons8.com/ios-glyphs/30/000000/chevron-up.png"
-          alt="Chevron icon"
-          className={`${rotate} inline-block`}
-        />
-      </button>
-      <div
-        ref={contentSpace}
-        style={{ maxHeight: `${height}` }}
-        className="overflow-auto scrollbar-hide transition-max-height duration-700 ease-in-out"
-      >
-        <div className="pb-10">This is very good and amazing.</div>
-      </div>
+    <motion.div variants={stepVariants}>
+      <form onSubmit={handleSubmit(updateFormData)}>
+        {fields.map((q, ind) => (
+          <QuestionAccordian
+            key={q.id}
+            questionRegister={register}
+            questionNo={ind}
+          />
+        ))}
+        <div className="flex items-center justify-between">
+          <button
+            className="transition ease-in-out duration-300 bg-blue-500 hover:bg-indigo-500 hover:scale-105 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
+            type="submit"
+          >
+            Start the Quiz
+          </button>
+        </div>
+      </form>
     </motion.div>
   );
 }

@@ -45,7 +45,7 @@ export default function Organizer() {
       </Head>
 
       <main className="flex flex-col place-content-center w-full flex-1 px-20 md:w-3/4">
-        <h1 className="absolute top-10 inset-x-0 text-3xl md:text-6xl font-bold text-center">
+        <h1 className="sticky-top-0 text-3xl md:text-6xl font-bold text-center">
           <div className="text-blue-600"> Create your Quiz </div>
         </h1>
         <div className="w-full m-4">
