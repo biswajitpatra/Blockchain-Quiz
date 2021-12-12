@@ -86,10 +86,47 @@ export default function QuizDetailForm({ updateFormData }) {
             className="block text-gray-700 font-bold mb-2"
             htmlFor="datetime"
           >
-            Choose your Date and Time{" "}
+            {" "}Quiz start time
             <span className="text-red-600 font-normal text-xs">
               ( This feature has not been implemented yet )
             </span>
+          </label>
+          <Controller
+            control={control}
+            name="date_input"
+            defaultValue={new Date()}
+            render={({ field }) => {
+              return (
+                <DateTimePicker
+                  required
+                  amPmAriaLabel="Select AM/PM"
+                  calendarAriaLabel="Toggle calendar"
+                  clearAriaLabel="Clear value"
+                  dayAriaLabel="Day"
+                  hourAriaLabel="Hour"
+                  maxDetail="second"
+                  minuteAriaLabel="Minute"
+                  monthAriaLabel="Month"
+                  nativeInputAriaLabel="Date and time"
+                  secondAriaLabel="Second"
+                  yearAriaLabel="Year"
+                  className="shadow bg-white"
+                  calendarClassName="rounded"
+                  clockClassName="rounded"
+                  onChange={field.onChange}
+                  value={field.value}
+                />
+              );
+            }}
+          />
+        </div>
+
+        <div className="mb-4">
+          <label
+            className="block text-gray-700 font-bold mb-2"
+            htmlFor="datetime"
+          >
+            {" "}Quiz end time
           </label>
           <Controller
             control={control}

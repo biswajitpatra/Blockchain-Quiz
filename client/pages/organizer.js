@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import QuizDetailForm from "../components/QuizDetailForm";
 import QuestionForm from "../components/QuestionForm";
+import OrganizerUploadForm from "../components/OrganizerUploadForm";
 
 const ease = [0.43, 0.13, 0.23, 0.96];
 
@@ -60,6 +61,7 @@ export default function Organizer() {
                 <QuizDetailForm updateFormData={updateFormData} />
               )}
               {stepNo == 2 && <QuestionForm updateFormData={updateFormData} />}
+              {stepNo == 3 && <OrganizerUploadForm questionData={formData}/>}
             </motion.div>
           </AnimatePresence>
         </div>

@@ -1,5 +1,5 @@
-var HelloWorld = artifacts.require("HelloWorld");
+var QuizContract = artifacts.require("QuizContract");
 
 module.exports = function(deployer) {
-  deployer.deploy(HelloWorld);
+  deployer.deploy(QuizContract);
 };
