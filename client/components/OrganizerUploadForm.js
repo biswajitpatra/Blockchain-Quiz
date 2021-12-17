@@ -36,7 +36,10 @@ export default function OrganizerUploadForm({ questionData }) {
   const [contract, setContract] = useState(null);
 
   const [progress, setProgress] = useState(80);
-
+  
+ // TODO: use web3-react to get the account
+ 
+ 
   // useEffect(() => {
   //   window.ethereum
   //     ? ethereum

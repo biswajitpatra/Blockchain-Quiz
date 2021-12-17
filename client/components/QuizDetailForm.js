@@ -93,7 +93,7 @@ export default function QuizDetailForm({ updateFormData }) {
           </label>
           <Controller
             control={control}
-            name="date_input"
+            name="start_datetime"
             defaultValue={new Date()}
             render={({ field }) => {
               return (
@@ -130,7 +130,7 @@ export default function QuizDetailForm({ updateFormData }) {
           </label>
           <Controller
             control={control}
-            name="date_input"
+            name="end_datetime"
             defaultValue={new Date()}
             render={({ field }) => {
               return (

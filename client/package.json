@@ -7,7 +7,10 @@
     "deploy": "vercel"
   },
   "dependencies": {
+    "@headlessui/react": "^1.4.2",
     "@heroicons/react": "^1.0.5",
+    "@web3-react/core": "^6.1.9",
+    "@web3-react/injected-connector": "^6.0.7",
     "framer-motion": "^5.4.3",
     "next": "latest",
     "react": "^17.0.2",
