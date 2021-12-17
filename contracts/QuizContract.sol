@@ -183,7 +183,9 @@ contract QuizContract {
 
         Quiz storage _quiz = quizzes[_quizId];
         _quiz.description = _description;
-        _quiz.questions = _questions;
+        for(uint i=0;i<_questions.length; i++){
+            _quiz.questions[i] = _questions[i];
+        }
         _quiz.quizOwner = _quizOwner;
     }
 

@@ -1,4 +1,4 @@
 module.exports = {
   NO_OF_QUESTIONS: 1,
-  contractAddress: "0x1755A948264a2F7fC62f3078c4ac5e7b020b91B0",
+  contractAddress: "0xAeD813bBBC5AeCFd0fcdb6122eb9dFfb0fd30cDC",
 };

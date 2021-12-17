@@ -1,9 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useWeb3React } from "@web3-react/core";
 import WalletModal from "../components/WalletModal";
-import { injected } from "../components/connectors/injectedConnector";
 
 const ease = [0.43, 0.13, 0.23, 0.96];
 
@@ -26,18 +24,6 @@ const pageVariants = {
 };
 
 export default function Home() {
-  const {
-    account,
-    activate,
-    active,
-    chainId,
-    connector,
-    deactivate,
-    error,
-    provider,
-    setError,
-  } = useWeb3React();
-
   return (
     <>
       <WalletModal required={false} />

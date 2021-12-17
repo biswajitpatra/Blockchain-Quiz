@@ -1,12 +1,160 @@
 [
 	{
-		"inputs": [],
-		"name": "getMessage",
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "description",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "startTime",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "endTime",
+				"type": "uint256"
+			}
+		],
+		"name": "NewQuiz",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"components": [
+					{
+						"internalType": "string",
+						"name": "quizName",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					},
+					{
+						"internalType": "address",
+						"name": "quizOwner",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "prizeMoney",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "startTime",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "endTime",
+						"type": "uint256"
+					},
+					{
+						"components": [
+							{
+								"internalType": "string",
+								"name": "question",
+								"type": "string"
+							},
+							{
+								"internalType": "string[2]",
+								"name": "options",
+								"type": "string[2]"
+							}
+						],
+						"internalType": "struct QuizContract.Question[1]",
+						"name": "questions",
+						"type": "tuple[1]"
+					}
+				],
+				"internalType": "struct QuizContract.Quiz",
+				"name": "_quiz",
+				"type": "tuple"
+			}
+		],
+		"name": "createQuiz",
 		"outputs": [
 			{
-				"internalType": "string",
+				"internalType": "uint256",
 				"name": "",
-				"type": "string"
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getPendingQuizzes",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "string",
+						"name": "quizName",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					},
+					{
+						"internalType": "address",
+						"name": "quizOwner",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "prizeMoney",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "startTime",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "endTime",
+						"type": "uint256"
+					},
+					{
+						"components": [
+							{
+								"internalType": "string",
+								"name": "question",
+								"type": "string"
+							},
+							{
+								"internalType": "string[2]",
+								"name": "options",
+								"type": "string[2]"
+							}
+						],
+						"internalType": "struct QuizContract.Question[1]",
+						"name": "questions",
+						"type": "tuple[1]"
+					}
+				],
+				"internalType": "struct QuizContract.Quiz[]",
+				"name": "pendingQuizzes",
+				"type": "tuple[]"
 			}
 		],
 		"stateMutability": "view",
@@ -15,12 +163,216 @@
 	{
 		"inputs": [
 			{
-				"internalType": "string",
-				"name": "newMessage",
-				"type": "string"
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
 			}
 		],
-		"name": "setMessage",
+		"name": "getQuizzesBy",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "string",
+						"name": "quizName",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					},
+					{
+						"internalType": "address",
+						"name": "quizOwner",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "prizeMoney",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "startTime",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "endTime",
+						"type": "uint256"
+					},
+					{
+						"components": [
+							{
+								"internalType": "string",
+								"name": "question",
+								"type": "string"
+							},
+							{
+								"internalType": "string[2]",
+								"name": "options",
+								"type": "string[2]"
+							}
+						],
+						"internalType": "struct QuizContract.Question[1]",
+						"name": "questions",
+						"type": "tuple[1]"
+					}
+				],
+				"internalType": "struct QuizContract.Quiz[]",
+				"name": "quizzesByUser",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "quizzes",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "quizName",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "description",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "quizOwner",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "prizeMoney",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "startTime",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "endTime",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_quizId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint8[1]",
+				"name": "_answers",
+				"type": "uint8[1]"
+			}
+		],
+		"name": "submitAnswer",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_quizId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint8[1]",
+				"name": "_quizAnswers",
+				"type": "uint8[1]"
+			}
+		],
+		"name": "submitCorrectAnswers",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "submittedAnswers",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "submissionTime",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "submissionAddress",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_quizId",
+				"type": "uint256"
+			},
+			{
+				"components": [
+					{
+						"internalType": "string",
+						"name": "question",
+						"type": "string"
+					},
+					{
+						"internalType": "string[2]",
+						"name": "options",
+						"type": "string[2]"
+					}
+				],
+				"internalType": "struct QuizContract.Question[1]",
+				"name": "_questions",
+				"type": "tuple[1]"
+			},
+			{
+				"internalType": "string",
+				"name": "_description",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_quizOwner",
+				"type": "address"
+			}
+		],
+		"name": "updateQuiz",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"

@@ -6,8 +6,9 @@ import Web3 from "web3";
 import { useState, useEffect } from "react";
 import quizABI from "../abi/quizContract.json";
 import { contractAddress } from "../config";
+import { useWeb3React } from "@web3-react/core";
+import WalletModal from "./WalletModal";
 
-let abi = quizABI;
 const ease = [0.43, 0.13, 0.23, 0.96];
 const stepVariants = {
   initial: {
@@ -30,84 +31,63 @@ const stepVariants = {
   },
 };
 
-export default function OrganizerUploadForm({ questionData }) {
-  const [web3, setWeb3] = useState(null);
-  const [address, setAddress] = useState(null);
-  const [contract, setContract] = useState(null);
-
+export default function OrganizerUploadForm({ formData }) {
   const [progress, setProgress] = useState(80);
-  
- // TODO: use web3-react to get the account
- 
- 
-  // useEffect(() => {
-  //   window.ethereum
-  //     ? ethereum
-  //         .request({ method: "eth_requestAccounts" })
-  //         .then((accounts) => {
-  //           setAddress(accounts[0]);
-  //           let w3 = new Web3(ethereum);
-  //           setWeb3(w3);
-  //           console.log(accounts[0]);
-  //           let c = new w3.eth.Contract(abi, contractAddress);
-  //           setContract(c);
-  //         })
-  //         .catch((err) => alert(err))
-  //     : alert("Please install MetaMask");
-  // }, []);
+  const { address, provider } = useWeb3React();
 
-  // useEffect(async () => {
-  //   if (!web3 || !contract || !address) {
-  //     return;
-  //   }
-
-  //   const value = await contract.methods.getMessage().call();
-  //   console.log(value);
-  // }, [contract]);
+  useEffect(() => {
+    const web3js = new Web3(provider);
+    const QuizContract = new web3js.eth.Contract(quizABI, contractAddress);
+    console.log(formData);
+    QuizContract.methods.createQuiz(formData).send({ from: address });
+  });
 
   return (
-    <motion.div variants={stepVariants} className="my-16">
-      <ProgressBar
-        percent={progress}
-        filledBackground="linear-gradient(to right, #71fafc, #0560fa)"
-      >
-        <Step transition="scale">
-          {({ accomplished }) => (
-            <CheckCircleIcon
-              width="40"
-              className="bg-white text-green-400"
-              style={{ filter: `grayscale(${accomplished ? 0 : 100}%)` }}
-            />
-          )}
-        </Step>
-        <Step transition="scale">
-          {({ accomplished }) => (
-            <CheckCircleIcon
-              width="40"
-              className="bg-white text-green-400"
-              style={{ filter: `grayscale(${accomplished ? 0 : 100}%)` }}
-            />
-          )}
-        </Step>
-        <Step transition="scale">
-          {({ accomplished }) => (
-            <CheckCircleIcon
-              width="40"
-              className="bg-white text-green-400"
-              style={{ filter: `grayscale(${accomplished ? 0 : 100}%)` }}
-            />
-          )}
-        </Step>
-        <Step transition="scale">
-          {({ accomplished }) => (
-            <CheckCircleIcon
-              width="40"
-              className="bg-white text-green-400"
-              style={{ filter: `grayscale(${accomplished ? 0 : 100}%)` }}
-            />
-          )}
-        </Step>
-      </ProgressBar>
-    </motion.div>
+    <>
+      <WalletModal />
+      <motion.div variants={stepVariants} className="my-16">
+        <ProgressBar
+          percent={progress}
+          filledBackground="linear-gradient(to right, #71fafc, #0560fa)"
+        >
+          <Step transition="scale">
+            {({ accomplished }) => (
+              <CheckCircleIcon
+                width="40"
+                className="bg-white text-green-400"
+                style={{ filter: `grayscale(${accomplished ? 0 : 100}%)` }}
+              />
+            )}
+          </Step>
+          <Step transition="scale">
+            {({ accomplished }) => (
+              <CheckCircleIcon
+                width="40"
+                className="bg-white text-green-400"
+                style={{ filter: `grayscale(${accomplished ? 0 : 100}%)` }}
+              />
+            )}
+          </Step>
+          <Step transition="scale">
+            {({ accomplished }) => (
+              <CheckCircleIcon
+                width="40"
+                className="bg-white text-green-400"
+                style={{ filter: `grayscale(${accomplished ? 0 : 100}%)` }}
+              />
+            )}
+          </Step>
+          <Step transition="scale">
+            {({ accomplished }) => (
+              <CheckCircleIcon
+                width="40"
+                className="bg-white text-green-400"
+                style={{ filter: `grayscale(${accomplished ? 0 : 100}%)` }}
+              />
+            )}
+          </Step>
+        </ProgressBar>
+      </motion.div>
+    </>
   );
 }

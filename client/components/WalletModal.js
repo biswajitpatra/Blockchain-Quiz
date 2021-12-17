@@ -3,7 +3,7 @@ import { Fragment, useEffect, useState } from "react";
 import { useWeb3React } from "@web3-react/core";
 import { injected } from "../components/connectors/injectedConnector";
 
-export default function WalletModal({ required = true, setIsConnected }) {
+export default function WalletModal({ required = true }) {
   const {
     account,
     activate,
@@ -18,7 +18,8 @@ export default function WalletModal({ required = true, setIsConnected }) {
   let [isOpen, setIsOpen] = useState(false);
 
   function closeModal() {
-    if (!required) setIsOpen(false);
+    if (active && required) setIsOpen(false);
+    else if (!required) setIsOpen(false);
   }
 
   function openModal() {
@@ -35,9 +36,6 @@ export default function WalletModal({ required = true, setIsConnected }) {
   }
 
   useEffect(() => {
-    if (setIsConnected) {
-      setIsConnected(active);
-    }
     if (!active && required) {
       setIsOpen(true);
     }
@@ -107,6 +105,12 @@ export default function WalletModal({ required = true, setIsConnected }) {
                       className="text-2xl font-medium leading-6 text-gray-900"
                     >
                       Connect to a Wallet
+                      {required && (
+                        <p className="text-sm text-red-600">
+                          {" "}
+                          *This page requires the wallet to be connected
+                        </p>
+                      )}
                     </Dialog.Title>
                     <div className="mt-4">
                       <button
@@ -134,10 +138,17 @@ export default function WalletModal({ required = true, setIsConnected }) {
                       className="text-lg font-medium leading-6 text-gray-900"
                     >
                       Wallet Connected
+                      {required && (
+                        <p className="text-sm text-red-600">
+                          {" "}
+                          *This page requires the wallet to be connected
+                        </p>
+                      )}
                     </Dialog.Title>
                     <div className="mt-2">
                       <button
-                        className="py-2 text-lg font-bold text-white rounded-lg w-56 bg-red-600 hover:bg-red-800"
+                        className="py-2 text-lg font-bold text-white rounded-lg w-56 bg-red-600 hover:bg-red-800 disabled:opacity-40"
+                        disabled={required}
                         onClick={() => {
                           deactivate();
                         }}

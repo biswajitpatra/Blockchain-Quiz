@@ -4,6 +4,7 @@ import { useState } from "react";
 import QuizDetailForm from "../components/QuizDetailForm";
 import QuestionForm from "../components/QuestionForm";
 import OrganizerUploadForm from "../components/OrganizerUploadForm";
+import WalletModal from "../components/WalletModal";
 
 const ease = [0.43, 0.13, 0.23, 0.96];
 
@@ -31,41 +32,46 @@ export default function Organizer() {
 
   const updateFormData = (data) => {
     console.log(data);
-    setFormData({ ...formData, data });
+    setFormData({ ...formData, ...data });
     setStepNo(stepNo + 1);
   };
 
   return (
-    <motion.div
-      variants={pageVariants}
-      className="flex flex-col items-center justify-center min-h-screen py-2"
-    >
-      <Head>
-        <title> Quiz App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    <>
+      <WalletModal />
+      <motion.div
+        variants={pageVariants}
+        className="flex flex-col items-center justify-center min-h-screen py-2"
+      >
+        <Head>
+          <title> Quiz App</title>
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
 
-      <main className="flex flex-col place-content-center w-full flex-1 px-20 md:w-3/4">
-        <h1 className="sticky-top-0 text-3xl md:text-6xl font-bold text-center">
-          <div className="text-blue-600"> Create your Quiz </div>
-        </h1>
-        <div className="w-full m-4">
-          <AnimatePresence exitBeforeEnter>
-            <motion.div
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              key={stepNo}
-            >
-              {stepNo == 1 && (
-                <QuizDetailForm updateFormData={updateFormData} />
-              )}
-              {stepNo == 2 && <QuestionForm updateFormData={updateFormData} />}
-              {stepNo == 3 && <OrganizerUploadForm questionData={formData}/>}
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </main>
-    </motion.div>
+        <main className="flex flex-col place-content-center w-full flex-1 px-20 md:w-3/4">
+          <h1 className="sticky-top-0 text-3xl md:text-6xl font-bold text-center">
+            <div className="text-blue-600"> Create your Quiz </div>
+          </h1>
+          <div className="w-full m-4">
+            <AnimatePresence exitBeforeEnter>
+              <motion.div
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                key={stepNo}
+              >
+                {stepNo == 1 && (
+                  <QuizDetailForm updateFormData={updateFormData} />
+                )}
+                {stepNo == 2 && (
+                  <QuestionForm updateFormData={updateFormData} />
+                )}
+                {stepNo == 3 && <OrganizerUploadForm questionData={formData} />}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </main>
+      </motion.div>
+    </>
   );
 }
