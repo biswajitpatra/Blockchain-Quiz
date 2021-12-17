@@ -62,10 +62,31 @@ contract QuizContract {
         return pendingQuizzes;
     }
 
+    function getQuizzesBy(address user)
+        public
+        view
+        returns (Quiz[] memory quizzesByUser)
+    {
+        uint256 noOfQuizzes = 0;
+        for (uint256 i = 0; i < quizzes.length; i++) {
+            if (quizzes[i].quizOwner == user) {
+                noOfQuizzes++;
+            }
+        }
+        quizzesByUser = new Quiz[](noOfQuizzes);
+        uint256 j = 0;
+        for (uint256 i = 0; i < quizzes.length; i++) {
+            if (quizzes[i].quizOwner == user) {
+                quizzesByUser[j++] = quizzes[i];
+            }
+        }
+        return quizzesByUser;
+    }
+
     function createQuiz(Quiz calldata _quiz)
         external
         payable
-        returns (uint256 quizId)
+        returns (uint256)
     {
         require(
             _quiz.startTime > block.timestamp,
@@ -81,6 +102,7 @@ contract QuizContract {
             _quiz.prizeMoney == msg.value,
             "Prize money must match the amount sent"
         );
+        require(_quiz.quizOwner != address(0), "Quiz owner cannot be empty");
 
         for (uint256 i = 0; i < _quiz.questions.length; i++) {
             require(
@@ -129,6 +151,42 @@ contract QuizContract {
         );
     }
 
+    function updateQuiz(
+        uint256 _quizId,
+        Question[noOfQuestions] calldata _questions,
+        string calldata _description,
+        address _quizOwner
+    ) external {
+        require(quizzes.length > _quizId, "Quiz Id does not exists");
+        require(
+            quizzes[_quizId].quizOwner == msg.sender,
+            "Only Quiz Owner can update the quiz"
+        );
+        require(
+            quizzes[_quizId].startTime > block.timestamp,
+            "Quiz can be updated before start of the quiz"
+        );
+
+        require(_quizOwner != address(0), "Quiz owner cannot be empty");
+        for (uint256 i = 0; i < _questions.length; i++) {
+            require(
+                bytes(_questions[i].question).length != 0,
+                "Question cannot be empty"
+            );
+            for (uint256 j = 0; j < _questions[i].options.length; j++) {
+                require(
+                    bytes(_questions[i].options[j]).length != 0,
+                    "Option cannot be empty"
+                );
+            }
+        }
+
+        Quiz storage _quiz = quizzes[_quizId];
+        _quiz.description = _description;
+        _quiz.questions = _questions;
+        _quiz.quizOwner = _quizOwner;
+    }
+
     function submitCorrectAnswers(
         uint256 _quizId,
         uint8[noOfQuestions] calldata _quizAnswers
@@ -142,6 +200,8 @@ contract QuizContract {
             quizzes[_quizId].quizOwner == msg.sender,
             "Only quiz owner can submit correct answers"
         );
+
+
         //TODO: Check for marks and distribute the prize money for top 25% in time
     }
 }
