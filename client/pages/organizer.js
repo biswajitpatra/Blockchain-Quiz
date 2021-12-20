@@ -66,7 +66,7 @@ export default function Organizer() {
                 {stepNo == 2 && (
                   <QuestionForm updateFormData={updateFormData} />
                 )}
-                {stepNo == 3 && <OrganizerUploadForm questionData={formData} />}
+                {stepNo == 3 && <OrganizerUploadForm formData={formData} />}
               </motion.div>
             </AnimatePresence>
           </div>

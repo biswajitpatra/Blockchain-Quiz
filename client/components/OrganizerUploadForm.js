@@ -4,7 +4,7 @@ import "react-step-progress-bar/styles.css";
 import { ProgressBar, Step } from "react-step-progress-bar";
 import Web3 from "web3";
 import { useState, useEffect } from "react";
-import quizABI from "../abi/quizContract.json";
+import quizABI from "../../build/contracts/QuizContract.json";
 import { contractAddress } from "../config";
 import { useWeb3React } from "@web3-react/core";
 import WalletModal from "./WalletModal";
@@ -32,15 +32,28 @@ const stepVariants = {
 };
 
 export default function OrganizerUploadForm({ formData }) {
-  const [progress, setProgress] = useState(80);
-  const { address, provider } = useWeb3React();
+  const [progress, setProgress] = useState(0);
+  const { account, library } = useWeb3React();
+  const noOfSteps = 3;
 
-  useEffect(() => {
-    const web3js = new Web3(provider);
-    const QuizContract = new web3js.eth.Contract(quizABI, contractAddress);
+  const updateProgress = (value) => {
+    setProgress((value * 100) / noOfSteps);
+  };
+
+  useEffect(async () => {
+    const web3js = new Web3(library);
+    const QuizContract = new web3js.eth.Contract(quizABI.abi, contractAddress);
     console.log(formData);
-    QuizContract.methods.createQuiz(formData).send({ from: address });
-  });
+    const receipt = await QuizContract.methods
+      .createQuiz({ ...formData, quizOwner: account })
+      .send({ from: account, value: formData.prizeMoney })
+      .on("sending", (p) => updateProgress(1))
+      .on("sent", (p) => updateProgress(2))
+      .on("receipt", (receipt) => updateProgress(3))
+      .on("error", (error, receipt) => {
+        console.log(error, receipt);
+      });
+  }, []);
 
   return (
     <>
@@ -50,42 +63,17 @@ export default function OrganizerUploadForm({ formData }) {
           percent={progress}
           filledBackground="linear-gradient(to right, #71fafc, #0560fa)"
         >
-          <Step transition="scale">
-            {({ accomplished }) => (
-              <CheckCircleIcon
-                width="40"
-                className="bg-white text-green-400"
-                style={{ filter: `grayscale(${accomplished ? 0 : 100}%)` }}
-              />
-            )}
-          </Step>
-          <Step transition="scale">
-            {({ accomplished }) => (
-              <CheckCircleIcon
-                width="40"
-                className="bg-white text-green-400"
-                style={{ filter: `grayscale(${accomplished ? 0 : 100}%)` }}
-              />
-            )}
-          </Step>
-          <Step transition="scale">
-            {({ accomplished }) => (
-              <CheckCircleIcon
-                width="40"
-                className="bg-white text-green-400"
-                style={{ filter: `grayscale(${accomplished ? 0 : 100}%)` }}
-              />
-            )}
-          </Step>
-          <Step transition="scale">
-            {({ accomplished }) => (
-              <CheckCircleIcon
-                width="40"
-                className="bg-white text-green-400"
-                style={{ filter: `grayscale(${accomplished ? 0 : 100}%)` }}
-              />
-            )}
-          </Step>
+          {[...Array(noOfSteps + 1)].map((_, index) => (
+            <Step transition="scale">
+              {({ accomplished }) => (
+                <CheckCircleIcon
+                  width="40"
+                  className="bg-white text-green-400"
+                  style={{ filter: `grayscale(${accomplished ? 0 : 100}%)` }}
+                />
+              )}
+            </Step>
+          ))}
         </ProgressBar>
       </motion.div>
     </>

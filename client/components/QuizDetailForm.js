@@ -32,6 +32,7 @@ export default function QuizDetailForm({ updateFormData }) {
     register,
     handleSubmit,
     formState: { errors },
+    getValues,
   } = useForm();
 
   return (
@@ -41,39 +42,40 @@ export default function QuizDetailForm({ updateFormData }) {
     >
       <form onSubmit={handleSubmit(updateFormData)}>
         <div className="mb-4">
-          <label className="text-gray-700 font-bold mb-2" htmlFor="name">
+          <label className="text-gray-700 font-bold mb-2" htmlFor="quizName">
             Name of Quiz
           </label>
           <input
-            {...register("quiz_name")}
+            {...register("quizName")}
             required
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="quiz_name"
             type="text"
             placeholder="Some amazing name for your quiz"
           />
         </div>
 
         <div className="mb-4">
-          <label className="text-gray-700 font-bold mb-2" htmlFor="name">
+          <label className="text-gray-700 font-bold mb-2" htmlFor="prizeMoney">
             Prize Money
           </label>
           <input
-            {...register("prize_money")}
+            {...register("prizeMoney", { valueAsNumber: true })}
             required
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="prize_money"
             type="number"
-            step="any"
-            placeholder="in Ether"
+            min="0"
+            placeholder="in Wei"
           />
         </div>
 
         <div className="mb-4">
-          <label className="block text-gray-700 font-bold mb-2">
-            Message
+          <label
+            className="block text-gray-700 font-bold mb-2"
+            htmlFor="description"
+          >
+            Description
             <textarea
-              {...register("message")}
+              {...register("description")}
               className="shadow form-textarea mt-1 block w-full border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               rows="5"
               placeholder="Some info for players (optional)"
@@ -84,17 +86,20 @@ export default function QuizDetailForm({ updateFormData }) {
         <div className="mb-4">
           <label
             className="block text-gray-700 font-bold mb-2"
-            htmlFor="datetime"
+            htmlFor="startTime"
           >
-            {" "}Quiz start time
-            <span className="text-red-600 font-normal text-xs">
-              ( This feature has not been implemented yet )
-            </span>
+            {" "}
+            Quiz start time
           </label>
           <Controller
             control={control}
-            name="start_datetime"
-            defaultValue={new Date()}
+            name="startTime"
+            defaultValue={new Date().getTime()}
+            rules={{
+              validate: (v) =>
+                v > new Date().getTime() ||
+                "Quiz start time should be greater than present time",
+            }}
             render={({ field }) => {
               return (
                 <DateTimePicker
@@ -113,25 +118,34 @@ export default function QuizDetailForm({ updateFormData }) {
                   className="shadow bg-white"
                   calendarClassName="rounded"
                   clockClassName="rounded"
-                  onChange={field.onChange}
-                  value={field.value}
+                  onChange={(e) => field.onChange(e.getTime())}
+                  value={new Date(field.value)}
                 />
               );
             }}
           />
+          <p className="text-red-600 font-normal text-xs">
+            {errors.startTime?.message}
+          </p>
         </div>
 
         <div className="mb-4">
           <label
             className="block text-gray-700 font-bold mb-2"
-            htmlFor="datetime"
+            htmlFor="endTime"
           >
-            {" "}Quiz end time
+            {" "}
+            Quiz end time
           </label>
           <Controller
             control={control}
-            name="end_datetime"
-            defaultValue={new Date()}
+            name="endTime"
+            defaultValue={new Date().getTime()}
+            rules={{
+              validate: (v) =>
+                v > getValues("startTime") ||
+                "Quiz end time should be greater than start time",
+            }}
             render={({ field }) => {
               return (
                 <DateTimePicker
@@ -150,12 +164,15 @@ export default function QuizDetailForm({ updateFormData }) {
                   className="shadow bg-white"
                   calendarClassName="rounded"
                   clockClassName="rounded"
-                  onChange={field.onChange}
-                  value={field.value}
+                  onChange={(e) => field.onChange(e.getTime())}
+                  value={new Date(field.value)}
                 />
               );
             }}
           />
+          <p className="text-red-600 font-normal text-xs">
+            {errors.endTime?.message}
+          </p>
         </div>
 
         <div className="flex items-center justify-between">

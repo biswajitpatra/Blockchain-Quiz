@@ -72,9 +72,9 @@
 								"type": "string"
 							},
 							{
-								"internalType": "string[2]",
+								"internalType": "string[4]",
 								"name": "options",
-								"type": "string[2]"
+								"type": "string[4]"
 							}
 						],
 						"internalType": "struct QuizContract.Question[1]",
@@ -142,9 +142,9 @@
 								"type": "string"
 							},
 							{
-								"internalType": "string[2]",
+								"internalType": "string[4]",
 								"name": "options",
-								"type": "string[2]"
+								"type": "string[4]"
 							}
 						],
 						"internalType": "struct QuizContract.Question[1]",
@@ -210,9 +210,9 @@
 								"type": "string"
 							},
 							{
-								"internalType": "string[2]",
+								"internalType": "string[4]",
 								"name": "options",
-								"type": "string[2]"
+								"type": "string[4]"
 							}
 						],
 						"internalType": "struct QuizContract.Question[1]",
@@ -352,9 +352,9 @@
 						"type": "string"
 					},
 					{
-						"internalType": "string[2]",
+						"internalType": "string[4]",
 						"name": "options",
-						"type": "string[2]"
+						"type": "string[4]"
 					}
 				],
 				"internalType": "struct QuizContract.Question[1]",

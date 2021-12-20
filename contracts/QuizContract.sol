@@ -3,7 +3,7 @@ pragma solidity 0.8.10;
 
 contract QuizContract {
     uint8 constant noOfQuestions = 1;
-    uint8 constant noOfOptions = 2;
+    uint8 constant noOfOptions = 4;
 
     event NewQuiz(
         string name,

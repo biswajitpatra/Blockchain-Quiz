@@ -12,7 +12,7 @@ export default function WalletModal({ required = true }) {
     connector,
     deactivate,
     error,
-    provider,
+    library,
     setError,
   } = useWeb3React();
   let [isOpen, setIsOpen] = useState(false);
@@ -27,6 +27,9 @@ export default function WalletModal({ required = true }) {
   }
 
   function switchError(error) {
+    if (process.env.NODE_ENV === "development") {
+      return error.name + ":" + error.message;
+    }
     switch (error.name) {
       case "UnsupportedChainIdError":
         return "We dont have support for this network. Please move to Ethereum network";
