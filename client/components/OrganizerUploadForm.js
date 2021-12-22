@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useRouter } from "next/router";
 import { CheckCircleIcon } from "@heroicons/react/solid";
 import "react-step-progress-bar/styles.css";
 import { ProgressBar, Step } from "react-step-progress-bar";
@@ -32,7 +33,9 @@ const stepVariants = {
 };
 
 export default function OrganizerUploadForm({ formData }) {
+  const router = useRouter();
   const [progress, setProgress] = useState(0);
+  const [message, setMessage] = useState("");
   const { account, library } = useWeb3React();
   const noOfSteps = 3;
 
@@ -44,27 +47,40 @@ export default function OrganizerUploadForm({ formData }) {
     const web3js = new Web3(library);
     const QuizContract = new web3js.eth.Contract(quizABI.abi, contractAddress);
     console.log(formData);
-    const receipt = await QuizContract.methods
+    await QuizContract.methods
       .createQuiz({ ...formData, quizOwner: account })
       .send({ from: account, value: formData.prizeMoney })
-      .on("sending", (p) => updateProgress(1))
-      .on("sent", (p) => updateProgress(2))
-      .on("receipt", (receipt) => updateProgress(3))
+      .on("sending", (p) => {
+        setMessage("Signing transaction...");
+        updateProgress(1);
+      })
+      .on("transactionHash", (hash) => {
+        setMessage("Transaction hash: " + hash);
+        updateProgress(2);
+      })
+      .on("receipt", (receipt) => {
+        setMessage("Successfully created quiz");
+        updateProgress(3);
+      })
       .on("error", (error, receipt) => {
         console.log(error, receipt);
+        setMessage(error.message);
       });
+
+    // router.push("/quiz");
   }, []);
 
   return (
     <>
       <WalletModal />
       <motion.div variants={stepVariants} className="my-16">
+        <div className="my-10 font-bold text-xl">{message}</div>
         <ProgressBar
           percent={progress}
           filledBackground="linear-gradient(to right, #71fafc, #0560fa)"
         >
           {[...Array(noOfSteps + 1)].map((_, index) => (
-            <Step transition="scale">
+            <Step transition="scale" key={index}>
               {({ accomplished }) => (
                 <CheckCircleIcon
                   width="40"

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.10;
+pragma solidity >=0.8.10;
 
 contract QuizContract {
     uint8 constant noOfQuestions = 1;
@@ -30,10 +30,10 @@ contract QuizContract {
         uint256 prizeMoney; //wei
         uint256 startTime;
         uint256 endTime;
-        Question[noOfQuestions] questions;
     }
 
     Quiz[] public quizzes;
+    mapping(uint256 => Question[noOfOptions]) public questions;
     mapping(uint256 => mapping(address => Answers)) public submittedAnswers;
 
     function getPendingQuizzes()
@@ -104,22 +104,27 @@ contract QuizContract {
         );
         require(_quiz.quizOwner != address(0), "Quiz owner cannot be empty");
 
-        for (uint256 i = 0; i < _quiz.questions.length; i++) {
+        quizzes.push(_quiz);
+
+        return quizzes.length - 1;
+    }
+
+    function submitQuestions(
+        uint256 __quizId,
+        Question[noOfOptions] calldata _questions
+    ) external {
+        for (uint256 i = 0; i < _questions.length; i++) {
             require(
-                bytes(_quiz.questions[i].question).length != 0,
+                bytes(_questions[i].question).length != 0,
                 "Question cannot be empty"
             );
-            for (uint256 j = 0; j < _quiz.questions[i].options.length; j++) {
+            for (uint256 j = 0; j < _questions[i].options.length; j++) {
                 require(
-                    bytes(_quiz.questions[i].options[j]).length != 0,
+                    bytes(_questions[i].options[j]).length != 0,
                     "Option cannot be empty"
                 );
             }
         }
-
-        quizzes.push(_quiz);
-
-        return quizzes.length - 1;
     }
 
     function submitAnswer(
@@ -138,7 +143,7 @@ contract QuizContract {
 
         for (uint256 i = 0; i < _answers.length; i++) {
             require(
-                _answers[i] < quizzes[_quizId].questions[i].options.length,
+                _answers[i] < questions[_quizId][i].options.length,
                 "Answer is out of range"
             );
             require(_answers[i] != 0, "Answer cannot be empty");
@@ -183,8 +188,8 @@ contract QuizContract {
 
         Quiz storage _quiz = quizzes[_quizId];
         _quiz.description = _description;
-        for(uint i=0;i<_questions.length; i++){
-            _quiz.questions[i] = _questions[i];
+        for (uint256 i = 0; i < _questions.length; i++) {
+            questions[_quizId][i] = _questions[i];
         }
         _quiz.quizOwner = _quizOwner;
     }
@@ -203,7 +208,6 @@ contract QuizContract {
             "Only quiz owner can submit correct answers"
         );
 
-
-        //TODO: Check for marks and distribute the prize money for top 25% in time
+        //TODO: Check for marks and distribute the prize money for toppers only
     }
 }
