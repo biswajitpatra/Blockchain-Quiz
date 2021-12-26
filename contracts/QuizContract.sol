@@ -39,6 +39,7 @@ contract QuizContract {
         uint8[noOfQuestions][noOfOptions] answers
     );
 
+
     struct Question {
         string question;
         string[noOfOptions] options;
@@ -63,7 +64,6 @@ contract QuizContract {
 
     address owner;
     Quiz[] public quizzes;
-    mapping(uint256 => Question[noOfOptions]) public questions;
     mapping(uint256 => mapping(address => Answers)) public submittedAnswers;
 
     constructor() {
@@ -166,14 +166,8 @@ contract QuizContract {
             }
         }
 
-        require(
-            msg.sender == owner &&
-                bytes(questions[_quizId][0].question).length == 0,
-            "Owner can submit questions when not submitted by quiz Creator"
-        );
-
         quizzes[_quizId].startTime = block.timestamp;
-        questions[_quizId] = _questions;
+        emit QuizStarted(_quizId, _questions);
     }
 
     function submitPlayerAnswer(
@@ -196,7 +190,7 @@ contract QuizContract {
 
         for (uint256 i = 0; i < _answers.length; i++) {
             require(
-                _answers[i] < questions[_quizId][i].options.length,
+                _answers[i] < noOfOptions,
                 "Answer is out of range"
             );
             require(_answers[i] != 0, "Answer cannot be empty");
@@ -246,6 +240,7 @@ contract QuizContract {
             "Only quiz owner can submit correct answers"
         );
 
-        //TODO: Check for marks and distribute the prize money for toppers only
+        //TODO: Check for marks and distribute the prize money ( for toppers only ) minus gas fees
+
     }
 }
