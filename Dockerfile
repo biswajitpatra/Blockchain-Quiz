@@ -1,21 +1,16 @@
 FROM node:16.13.1
 
+WORKDIR /app
+
 # Install Truffle
 RUN npm install -g truffle
 RUN npm config set bin-links false
 
-# Move Contract Files
-COPY contracts ./contracts
-COPY migrations ./migrations
-COPY test ./test
-COPY truffle-config.js ./truffle-config.js
+COPY ./client/package.json ./client/
+COPY ./client/yarn.lock ./client/
+RUN cd client && yarn
 
-# Move NextJs Files
-COPY client/ ./client/
-COPY client/public ./client/public
-COPY client/package*.json ./client/package*.json
+COPY . .
 
 EXPOSE 3000
-
-# Clean Install NPM Dependencies
-RUN cd client && npm ci
+CMD cd client && yarn run dev

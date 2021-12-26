@@ -3,9 +3,8 @@ version: '3'
 services:
   ganache-cli:
     image: trufflesuite/ganache-cli:latest
-    command: node /app/ganache-core.docker.cli.js --quiet \
---account="0x873c254263b17925b686f971d7724267710895f1585bb0533db8e693a2af32ff,100000000000000000000" \
---account="0x8c0ba8fece2e596a9acfc56c6c1bf57b6892df2cf136256dfcb49f6188d67940,100000000000000000000"
+    container_name: ganache-cli
+    command: node /app/ganache-core.docker.cli.js --quiet --account="0x873c254263b17925b686f971d7724267710895f1585bb0533db8e693a2af32ff,100000000000000000000" --account="0x8c0ba8fece2e596a9acfc56c6c1bf57b6892df2cf136256dfcb49f6188d67940,100000000000000000000"
     ports:
       - 8545:8545
 
@@ -17,7 +16,7 @@ services:
       
   client:
     build:
-      context: ./
+      context: .
     healthcheck:
       test: curl -sf -X POST --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' localhost:8545
       interval: 5s
@@ -30,11 +29,11 @@ services:
       sh -c "truffle compile &&
              truffle test &&
              truffle migrate &&
-             cp -R output/contracts client/src/contracts/ &&
              cd client &&
              yarn run dev"
     ports:
       - 3000:3000
     tty: true
     volumes:
-      - ./client/:/client/
+      - .:/app
+      - /app/client/node_modules
