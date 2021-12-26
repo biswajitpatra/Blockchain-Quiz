@@ -5,11 +5,38 @@ contract QuizContract {
     uint8 constant noOfQuestions = 1;
     uint8 constant noOfOptions = 4;
 
-    event NewQuiz(
+    event QuizCreated(
+        uint256 quizId,
         string name,
         string description,
+        uint256 prizeMoney,
         uint256 startTime,
-        uint256 endTime
+        uint256 duration
+    );
+
+    event QuizUpdated(
+        uint256 quizId,
+        string name,
+        string description,
+        uint256 prizeMoney,
+        uint256 startTime,
+        uint256 duration
+    );
+
+    event QuizStarted(
+        uint256 quizId,
+        Question[noOfQuestions] questions
+    );
+
+    event QuizEnded(
+        uint256 quizId,
+        string name,
+        string description,
+        uint256 prizeMoney,
+        uint256 startTime,
+        uint256 duration,
+        address[] winners,
+        uint8[noOfQuestions][noOfOptions] answers
     );
 
     struct Question {
@@ -29,12 +56,19 @@ contract QuizContract {
         address quizOwner;
         uint256 prizeMoney; //wei
         uint256 startTime;
-        uint256 endTime;
+        uint256 duration; //minutes
+        string questionHash;
+        string answerHash;
     }
 
+    address owner;
     Quiz[] public quizzes;
     mapping(uint256 => Question[noOfOptions]) public questions;
     mapping(uint256 => mapping(address => Answers)) public submittedAnswers;
+
+    constructor() {
+        owner = msg.sender;
+    }
 
     function getPendingQuizzes()
         public
@@ -45,7 +79,8 @@ contract QuizContract {
         uint256 noOfQuizzes = 0;
         for (uint256 i = 0; i < quizzes.length; i++) {
             if (
-                quizzes[i].startTime <= present && quizzes[i].endTime >= present
+                quizzes[i].startTime <= present &&
+                (quizzes[i].startTime + quizzes[i].duration) >= present
             ) {
                 noOfQuizzes++;
             }
@@ -54,7 +89,8 @@ contract QuizContract {
         uint256 j = 0;
         for (uint256 i = 0; i < quizzes.length; i++) {
             if (
-                quizzes[i].startTime <= present && quizzes[i].endTime >= present
+                quizzes[i].startTime <= present &&
+                (quizzes[i].startTime + quizzes[i].duration) >= present
             ) {
                 pendingQuizzes[j++] = quizzes[i];
             }
@@ -93,7 +129,7 @@ contract QuizContract {
             "Quiz cannot be created in the past"
         );
         require(
-            _quiz.endTime > _quiz.startTime,
+            _quiz.startTime + _quiz.duration > _quiz.startTime,
             "Quiz cannot be created with end time before start time"
         );
         require(bytes(_quiz.quizName).length != 0, "Quiz name cannot be empty");
@@ -110,9 +146,13 @@ contract QuizContract {
     }
 
     function submitQuestions(
-        uint256 __quizId,
-        Question[noOfOptions] calldata _questions
+        uint256 _quizId,
+        Question[noOfQuestions] calldata _questions
     ) external {
+        require(
+            msg.sender == owner || msg.sender == quizzes[_quizId].quizOwner,
+            "Only owner or the quiz creator can submit questions"
+        );
         for (uint256 i = 0; i < _questions.length; i++) {
             require(
                 bytes(_questions[i].question).length != 0,
@@ -125,9 +165,18 @@ contract QuizContract {
                 );
             }
         }
+
+        require(
+            msg.sender == owner &&
+                bytes(questions[_quizId][0].question).length == 0,
+            "Owner can submit questions when not submitted by quiz Creator"
+        );
+
+        quizzes[_quizId].startTime = block.timestamp;
+        questions[_quizId] = _questions;
     }
 
-    function submitAnswer(
+    function submitPlayerAnswer(
         uint256 _quizId,
         uint8[noOfQuestions] calldata _answers
     ) external {
@@ -135,7 +184,11 @@ contract QuizContract {
             quizzes[_quizId].startTime <= block.timestamp,
             "Quiz has not started yet"
         );
-        require(quizzes[_quizId].endTime >= block.timestamp, "Quiz has ended");
+        require(
+            quizzes[_quizId].startTime + quizzes[_quizId].duration >=
+                block.timestamp,
+            "Quiz has ended"
+        );
         require(
             submittedAnswers[_quizId][msg.sender].submissionTime == 0,
             "You have already submitted the answers"
@@ -158,7 +211,6 @@ contract QuizContract {
 
     function updateQuiz(
         uint256 _quizId,
-        Question[noOfQuestions] calldata _questions,
         string calldata _description,
         address _quizOwner
     ) external {
@@ -173,24 +225,9 @@ contract QuizContract {
         );
 
         require(_quizOwner != address(0), "Quiz owner cannot be empty");
-        for (uint256 i = 0; i < _questions.length; i++) {
-            require(
-                bytes(_questions[i].question).length != 0,
-                "Question cannot be empty"
-            );
-            for (uint256 j = 0; j < _questions[i].options.length; j++) {
-                require(
-                    bytes(_questions[i].options[j]).length != 0,
-                    "Option cannot be empty"
-                );
-            }
-        }
 
         Quiz storage _quiz = quizzes[_quizId];
         _quiz.description = _description;
-        for (uint256 i = 0; i < _questions.length; i++) {
-            questions[_quizId][i] = _questions[i];
-        }
         _quiz.quizOwner = _quizOwner;
     }
 
@@ -200,7 +237,8 @@ contract QuizContract {
     ) external {
         require(_quizId < quizzes.length, "Quiz does not exist");
         require(
-            block.timestamp > quizzes[_quizId].endTime,
+            block.timestamp >
+                quizzes[_quizId].startTime + quizzes[_quizId].duration,
             "Correct Answers cannot be submitted before end time"
         );
         require(
