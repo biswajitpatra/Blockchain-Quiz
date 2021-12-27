@@ -5,40 +5,18 @@ contract QuizContract {
     uint8 constant noOfQuestions = 1;
     uint8 constant noOfOptions = 4;
 
-    event QuizCreated(
-        uint256 quizId,
-        string name,
-        string description,
-        uint256 prizeMoney,
-        uint256 startTime,
-        uint256 duration
-    );
+    event QuizCreated(uint256 quizId, Quiz quiz);
 
-    event QuizUpdated(
-        uint256 quizId,
-        string name,
-        string description,
-        uint256 prizeMoney,
-        uint256 startTime,
-        uint256 duration
-    );
+    event QuizUpdated(uint256 quizId, Quiz quiz);
 
-    event QuizStarted(
-        uint256 quizId,
-        Question[noOfQuestions] questions
-    );
+    event QuizStarted(uint256 quizId, Question[noOfQuestions] questions);
 
     event QuizEnded(
         uint256 quizId,
-        string name,
-        string description,
-        uint256 prizeMoney,
-        uint256 startTime,
-        uint256 duration,
+        Quiz quiz,
         address[] winners,
         uint8[noOfQuestions][noOfOptions] answers
     );
-
 
     struct Question {
         string question;
@@ -58,16 +36,33 @@ contract QuizContract {
         uint256 prizeMoney; //wei
         uint256 startTime;
         uint256 duration; //minutes
-        string questionHash;
-        string answerHash;
+        bytes32 questionHash;
+        bytes32 answerHash;
     }
 
     address owner;
     Quiz[] public quizzes;
-    mapping(uint256 => mapping(address => Answers)) public submittedAnswers;
+    mapping(uint256 => Answers[]) public submittedAnswers;
+    mapping(uint256 => mapping(address => bool)) public isSubmited;
 
     constructor() {
         owner = msg.sender;
+    }
+
+    function hashQuestions(Question[noOfQuestions] calldata questions)
+        internal
+        pure
+        returns (bytes32)
+    {
+        return keccak256(abi.encode(questions));
+    }
+
+    function hashAnswers(uint8[noOfQuestions] calldata answers, string calldata _hashSalt)
+        internal
+        pure
+        returns (bytes32)
+    {
+        return keccak256(abi.encode(answers, _hashSalt));
     }
 
     function getPendingQuizzes()
@@ -141,8 +136,35 @@ contract QuizContract {
         require(_quiz.quizOwner != address(0), "Quiz owner cannot be empty");
 
         quizzes.push(_quiz);
+        emit QuizCreated(quizzes.length - 1, _quiz);
 
         return quizzes.length - 1;
+    }
+
+    function updateQuiz(
+        uint256 _quizId,
+        string calldata _description,
+        address _quizOwner,
+        bytes32 _questionHash,
+        bytes32 _answerHash
+    ) external {
+        require(quizzes.length > _quizId, "Quiz Id does not exists");
+        require(
+            quizzes[_quizId].quizOwner == msg.sender,
+            "Only Quiz Owner can update the quiz"
+        );
+        require(
+            quizzes[_quizId].startTime > block.timestamp,
+            "Quiz can be updated before start of the quiz"
+        );
+
+        require(_quizOwner != address(0), "Quiz owner cannot be empty");
+
+        Quiz storage _quiz = quizzes[_quizId];
+        _quiz.description = _description;
+        _quiz.quizOwner = _quizOwner;
+        _quiz.questionHash = _questionHash;
+        _quiz.answerHash = _answerHash;
     }
 
     function submitQuestions(
@@ -165,6 +187,10 @@ contract QuizContract {
                 );
             }
         }
+        require(
+            hashQuestions(_questions) == quizzes[_quizId].questionHash,
+            "Questions are not valid"
+        );
 
         quizzes[_quizId].startTime = block.timestamp;
         emit QuizStarted(_quizId, _questions);
@@ -184,50 +210,25 @@ contract QuizContract {
             "Quiz has ended"
         );
         require(
-            submittedAnswers[_quizId][msg.sender].submissionTime == 0,
+            isSubmited[_quizId][msg.sender] == false,
             "You have already submitted the answers"
         );
 
         for (uint256 i = 0; i < _answers.length; i++) {
-            require(
-                _answers[i] < noOfOptions,
-                "Answer is out of range"
-            );
+            require(_answers[i] < noOfOptions, "Answer is out of range");
             require(_answers[i] != 0, "Answer cannot be empty");
         }
 
-        submittedAnswers[_quizId][msg.sender] = Answers(
-            _answers,
-            block.timestamp,
-            msg.sender
+        isSubmited[_quizId][msg.sender] = true;
+        submittedAnswers[_quizId].push(
+            Answers(_answers, block.timestamp, msg.sender)
         );
-    }
-
-    function updateQuiz(
-        uint256 _quizId,
-        string calldata _description,
-        address _quizOwner
-    ) external {
-        require(quizzes.length > _quizId, "Quiz Id does not exists");
-        require(
-            quizzes[_quizId].quizOwner == msg.sender,
-            "Only Quiz Owner can update the quiz"
-        );
-        require(
-            quizzes[_quizId].startTime > block.timestamp,
-            "Quiz can be updated before start of the quiz"
-        );
-
-        require(_quizOwner != address(0), "Quiz owner cannot be empty");
-
-        Quiz storage _quiz = quizzes[_quizId];
-        _quiz.description = _description;
-        _quiz.quizOwner = _quizOwner;
     }
 
     function submitCorrectAnswers(
         uint256 _quizId,
-        uint8[noOfQuestions] calldata _quizAnswers
+        uint8[noOfQuestions] calldata _quizAnswers,
+        string calldata _hashSalt
     ) external {
         require(_quizId < quizzes.length, "Quiz does not exist");
         require(
@@ -240,7 +241,10 @@ contract QuizContract {
             "Only quiz owner can submit correct answers"
         );
 
+        require(
+            hashAnswers(_quizAnswers, _hashSalt) == quizzes[_quizId].answerHash,
+            "Correct answers are not valid"
+        );  
         //TODO: Check for marks and distribute the prize money ( for toppers only ) minus gas fees
-
     }
 }
