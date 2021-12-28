@@ -47,8 +47,32 @@ export default function OrganizerUploadForm({ formData }) {
     const web3js = new Web3(library);
     const QuizContract = new web3js.eth.Contract(quizABI.abi, contractAddress);
     console.log(formData);
+    let questions = [];
+    let answers = [];
+    for (let i = 0; i < formData.questions.length; i++) {
+      questions.push({
+        question: formData.questions[i].question,
+        options: formData.questions[i].options,
+      });
+      answers.push(formData.questions[i].correctOption);
+    }
+    let encodedQuestions = web3js.eth.abi.encodeParameter(
+      { "questions[]": { question: "string", options: "string[]" } },
+      questions
+    );
+
+    let encodedAnswers = web3js.eth.abi.encodeParameter("uint8[]", answers);
+
     await QuizContract.methods
-      .createQuiz({ ...formData, quizOwner: account })
+      .createQuiz({
+        questions,
+        ...formData,
+        startTime: Math.floor(formData.startTime / 1000),
+        questionHash: web3js.utils.soliditySha3(encodedQuestions),
+        answerHash: web3js.utils.soliditySha3(encodedAnswers),
+        quizOwner: account,
+        duration: formData.duration * 60,
+      })
       .send({ from: account, value: formData.prizeMoney })
       .on("sending", (p) => {
         setMessage("Signing transaction...");
@@ -60,6 +84,7 @@ export default function OrganizerUploadForm({ formData }) {
       })
       .on("receipt", (receipt) => {
         setMessage("Successfully created quiz");
+        console.log(receipt);
         updateProgress(3);
       })
       .on("error", (error, receipt) => {

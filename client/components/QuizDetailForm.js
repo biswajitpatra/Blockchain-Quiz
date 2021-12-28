@@ -132,47 +132,19 @@ export default function QuizDetailForm({ updateFormData }) {
         <div className="mb-4">
           <label
             className="block text-gray-700 font-bold mb-2"
-            htmlFor="endTime"
+            htmlFor="duration"
           >
             {" "}
-            Quiz end time
+            Quiz duration (in minutes)
           </label>
-          <Controller
-            control={control}
-            name="endTime"
-            defaultValue={new Date().getTime()}
-            rules={{
-              validate: (v) =>
-                v > getValues("startTime") ||
-                "Quiz end time should be greater than start time",
-            }}
-            render={({ field }) => {
-              return (
-                <DateTimePicker
-                  required
-                  amPmAriaLabel="Select AM/PM"
-                  calendarAriaLabel="Toggle calendar"
-                  clearAriaLabel="Clear value"
-                  dayAriaLabel="Day"
-                  hourAriaLabel="Hour"
-                  maxDetail="second"
-                  minuteAriaLabel="Minute"
-                  monthAriaLabel="Month"
-                  nativeInputAriaLabel="Date and time"
-                  secondAriaLabel="Second"
-                  yearAriaLabel="Year"
-                  className="shadow bg-white"
-                  calendarClassName="rounded"
-                  clockClassName="rounded"
-                  onChange={(e) => field.onChange(e.getTime())}
-                  value={new Date(field.value)}
-                />
-              );
-            }}
+          <input
+            {...register("duration", { valueAsNumber: true })}
+            required
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            type="number"
+            min="1"
+            placeholder="in Minutes"
           />
-          <p className="text-red-600 font-normal text-xs">
-            {errors.endTime?.message}
-          </p>
         </div>
 
         <div className="flex items-center justify-between">

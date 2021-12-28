@@ -11,11 +11,11 @@ contract QuizContract {
 
     event QuizStarted(uint256 quizId, Question[noOfQuestions] questions);
 
-    event QuizEnded(
+    event QuizCompleted(
         uint256 quizId,
         Quiz quiz,
         address[] winners,
-        uint8[noOfQuestions][noOfOptions] answers
+        uint8[noOfQuestions] answers
     );
 
     struct Question {
@@ -222,7 +222,7 @@ contract QuizContract {
         uint256 _quizId,
         uint8[noOfQuestions] calldata _quizAnswers,
         string calldata _hashSalt
-    ) external onlyOwners(_quizId) refundGas(_quizId) {
+    ) external onlyOwners(_quizId) {
         require(_quizId < quizzes.length, "Quiz does not exist");
         require(
             block.timestamp >
@@ -265,6 +265,8 @@ contract QuizContract {
             }
         }
         payable(quizzes[_quizId].quizOwner).transfer(prizeMoneyLeft);
+
+        emit QuizCompleted(_quizId, quizzes[_quizId], winners, _quizAnswers);
     }
 
     function submitPlayerAnswer(
