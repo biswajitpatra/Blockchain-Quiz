@@ -49,6 +49,24 @@ contract QuizContract {
         owner = msg.sender;
     }
 
+    modifier onlyOwners(uint256 _quizId) {
+        require(
+            msg.sender == owner || msg.sender == quizzes[_quizId].quizOwner,
+            "Only owner or the quiz creator can submit questions"
+        );
+        _;
+    }
+
+    modifier refundGas(uint256 _quizId) {
+        uint256 gasAtStart = gasleft();
+        _;
+        if (msg.sender != owner) return;
+        uint256 gasSpent = gasAtStart - gasleft() + 30000;
+        uint256 gasCost = gasSpent * tx.gasprice;
+        payable(msg.sender).transfer(gasCost);
+        quizzes[_quizId].prizeMoney -= gasCost;
+    }
+
     function hashQuestions(Question[noOfQuestions] calldata questions)
         internal
         pure
@@ -57,12 +75,20 @@ contract QuizContract {
         return keccak256(abi.encode(questions));
     }
 
-    function hashAnswers(uint8[noOfQuestions] calldata answers, string calldata _hashSalt)
-        internal
-        pure
-        returns (bytes32)
-    {
+    function hashAnswers(
+        uint8[noOfQuestions] calldata answers,
+        string calldata _hashSalt
+    ) internal pure returns (bytes32) {
         return keccak256(abi.encode(answers, _hashSalt));
+    }
+
+    function equalAnswers(
+        uint8[noOfQuestions] storage correctOptions,
+        uint8[noOfQuestions] calldata optionsB
+    ) internal pure returns (bool) {
+        return
+            keccak256(abi.encode(correctOptions)) ==
+            keccak256(abi.encode(optionsB));
     }
 
     function getPendingQuizzes()
@@ -94,7 +120,7 @@ contract QuizContract {
     }
 
     function getQuizzesBy(address user)
-        public
+        external
         view
         returns (Quiz[] memory quizzesByUser)
     {
@@ -170,11 +196,7 @@ contract QuizContract {
     function submitQuestions(
         uint256 _quizId,
         Question[noOfQuestions] calldata _questions
-    ) external {
-        require(
-            msg.sender == owner || msg.sender == quizzes[_quizId].quizOwner,
-            "Only owner or the quiz creator can submit questions"
-        );
+    ) external onlyOwners(_quizId) refundGas(_quizId) {
         for (uint256 i = 0; i < _questions.length; i++) {
             require(
                 bytes(_questions[i].question).length != 0,
@@ -194,6 +216,55 @@ contract QuizContract {
 
         quizzes[_quizId].startTime = block.timestamp;
         emit QuizStarted(_quizId, _questions);
+    }
+
+    function submitCorrectAnswers(
+        uint256 _quizId,
+        uint8[noOfQuestions] calldata _quizAnswers,
+        string calldata _hashSalt
+    ) external onlyOwners(_quizId) refundGas(_quizId) {
+        require(_quizId < quizzes.length, "Quiz does not exist");
+        require(
+            block.timestamp >
+                quizzes[_quizId].startTime + quizzes[_quizId].duration,
+            "Correct Answers cannot be submitted before end time"
+        );
+        require(
+            hashAnswers(_quizAnswers, _hashSalt) == quizzes[_quizId].answerHash,
+            "Correct answers are not valid"
+        );
+
+        uint256 totalWinners = 0;
+        for (uint256 i = 0; i < submittedAnswers[_quizId].length; i++) {
+            if (
+                equalAnswers(
+                    submittedAnswers[_quizId][i].selectedOptions,
+                    _quizAnswers
+                )
+            ) {
+                totalWinners++;
+            }
+        }
+        address[] memory winners = new address[](totalWinners);
+        uint256 prizeMoneyPerWinner = quizzes[_quizId].prizeMoney /
+            totalWinners;
+        uint256 prizeMoneyLeft = quizzes[_quizId].prizeMoney -
+            prizeMoneyPerWinner *
+            totalWinners;
+        uint256 j = 0;
+        for (uint256 i = 0; i < submittedAnswers[_quizId].length; i++) {
+            if (
+                equalAnswers(
+                    submittedAnswers[_quizId][i].selectedOptions,
+                    _quizAnswers
+                )
+            ) {
+                winners[j++] = submittedAnswers[_quizId][i].submissionAddress;
+                payable(submittedAnswers[_quizId][i].submissionAddress)
+                    .transfer(prizeMoneyPerWinner);
+            }
+        }
+        payable(quizzes[_quizId].quizOwner).transfer(prizeMoneyLeft);
     }
 
     function submitPlayerAnswer(
@@ -223,28 +294,5 @@ contract QuizContract {
         submittedAnswers[_quizId].push(
             Answers(_answers, block.timestamp, msg.sender)
         );
-    }
-
-    function submitCorrectAnswers(
-        uint256 _quizId,
-        uint8[noOfQuestions] calldata _quizAnswers,
-        string calldata _hashSalt
-    ) external {
-        require(_quizId < quizzes.length, "Quiz does not exist");
-        require(
-            block.timestamp >
-                quizzes[_quizId].startTime + quizzes[_quizId].duration,
-            "Correct Answers cannot be submitted before end time"
-        );
-        require(
-            quizzes[_quizId].quizOwner == msg.sender,
-            "Only quiz owner can submit correct answers"
-        );
-
-        require(
-            hashAnswers(_quizAnswers, _hashSalt) == quizzes[_quizId].answerHash,
-            "Correct answers are not valid"
-        );  
-        //TODO: Check for marks and distribute the prize money ( for toppers only ) minus gas fees
     }
 }
