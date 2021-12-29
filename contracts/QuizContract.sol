@@ -38,6 +38,7 @@ contract QuizContract {
         uint256 duration; //minutes
         bytes32 questionHash;
         bytes32 answerHash;
+        bool cancel;
     }
 
     address owner;
@@ -139,7 +140,14 @@ contract QuizContract {
         }
         return quizzesByUser;
     }
-
+    function cancelQuiz() external  {
+        for(uint8 i=0;i<quizzes.length;i++)
+        {
+            if(quizzes[i].quizOwner == msg.sender){
+              quizzes[i].cancel = true;
+         }
+        }
+    } 
     function createQuiz(Quiz calldata _quiz)
         external
         payable
@@ -217,6 +225,8 @@ contract QuizContract {
         quizzes[_quizId].startTime = block.timestamp;
         emit QuizStarted(_quizId, _questions);
     }
+
+    
 
     function submitCorrectAnswers(
         uint256 _quizId,
