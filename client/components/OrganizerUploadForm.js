@@ -43,10 +43,19 @@ export default function OrganizerUploadForm({ formData }) {
     setProgress((value * 100) / noOfSteps);
   };
 
+  function randomString(length) {
+    var result = "";
+    var characters = "abcdef0123456789";
+    var charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  }
+
   useEffect(async () => {
     const web3js = new Web3(library);
     const QuizContract = new web3js.eth.Contract(quizABI.abi, contractAddress);
-    console.log(formData);
     let questions = [];
     let answers = [];
     for (let i = 0; i < formData.questions.length; i++) {
@@ -61,18 +70,22 @@ export default function OrganizerUploadForm({ formData }) {
       questions
     );
 
-    let encodedAnswers = web3js.eth.abi.encodeParameter("uint8[]", answers);
+    let hashSalt = "0x" + randomString(64);
+    let encodedAnswers = web3js.eth.abi.encodeParameters(
+      ["uint8[]", "bytes32"],
+      [answers, hashSalt.toString()]
+    );
 
     await QuizContract.methods
-      .createQuiz({
-        questions,
-        ...formData,
-        startTime: Math.floor(formData.startTime / 1000),
-        questionHash: web3js.utils.soliditySha3(encodedQuestions),
-        answerHash: web3js.utils.soliditySha3(encodedAnswers),
-        quizOwner: account,
-        duration: formData.duration * 60,
-      })
+      .createQuiz(
+        formData.quizName,
+        formData.description,
+        formData.prizeMoney,
+        Math.floor(formData.startTime / 1000),
+        formData.duration * 60,
+        web3js.utils.soliditySha3(encodedQuestions),
+        web3js.utils.soliditySha3(encodedAnswers)
+      )
       .send({ from: account, value: formData.prizeMoney })
       .on("sending", (p) => {
         setMessage("Signing transaction...");

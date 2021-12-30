@@ -30,14 +30,16 @@ contract QuizContract {
     }
 
     struct Quiz {
+        uint256 quizId;
         string quizName;
         string description;
         address quizOwner;
         uint256 prizeMoney; //wei
         uint256 startTime;
-        uint256 duration; //minutes
+        uint256 duration; //seconds
         bytes32 questionHash;
         bytes32 answerHash;
+        bool isRunning;
     }
 
     address owner;
@@ -77,7 +79,7 @@ contract QuizContract {
 
     function hashAnswers(
         uint8[noOfQuestions] calldata answers,
-        string calldata _hashSalt
+        bytes32 _hashSalt
     ) internal pure returns (bytes32) {
         return keccak256(abi.encode(answers, _hashSalt));
     }
@@ -139,30 +141,45 @@ contract QuizContract {
         }
         return quizzesByUser;
     }
-
-    function createQuiz(Quiz calldata _quiz)
-        external
-        payable
-        returns (uint256)
-    {
+    
+    function createQuiz(
+        string calldata quizName,
+        string calldata description,
+        uint256 prizeMoney, //wei
+        uint256 startTime,
+        uint256 duration, //seconds
+        bytes32 questionHash,
+        bytes32 answerHash
+    ) external payable returns (uint256) {
         require(
-            _quiz.startTime > block.timestamp,
+            startTime > block.timestamp,
             "Quiz cannot be created in the past"
         );
         require(
-            _quiz.startTime + _quiz.duration > _quiz.startTime,
+            startTime + duration > startTime,
             "Quiz cannot be created with end time before start time"
         );
-        require(bytes(_quiz.quizName).length != 0, "Quiz name cannot be empty");
-        require(_quiz.prizeMoney > 0, "Prize money cannot be zero");
+        require(bytes(quizName).length != 0, "Quiz name cannot be empty");
+        require(prizeMoney > 0, "Prize money cannot be zero");
         require(
-            _quiz.prizeMoney == msg.value,
+            prizeMoney == msg.value,
             "Prize money must match the amount sent"
         );
-        require(_quiz.quizOwner != address(0), "Quiz owner cannot be empty");
 
-        quizzes.push(_quiz);
-        emit QuizCreated(quizzes.length - 1, _quiz);
+        Quiz memory _newQuiz = Quiz(
+            quizzes.length,
+            quizName,
+            description,
+            msg.sender,
+            prizeMoney,
+            startTime,
+            duration,
+            questionHash,
+            answerHash,
+            false
+        );
+        quizzes.push(_newQuiz);
+        emit QuizCreated(quizzes.length - 1, _newQuiz);
 
         return quizzes.length - 1;
     }
@@ -197,6 +214,7 @@ contract QuizContract {
         uint256 _quizId,
         Question[noOfQuestions] calldata _questions
     ) external onlyOwners(_quizId) refundGas(_quizId) {
+        require(quizzes[_quizId].isRunning == false, "Quiz has already started");
         for (uint256 i = 0; i < _questions.length; i++) {
             require(
                 bytes(_questions[i].question).length != 0,
@@ -215,15 +233,17 @@ contract QuizContract {
         );
 
         quizzes[_quizId].startTime = block.timestamp;
+        quizzes[_quizId].isRunning = true;
         emit QuizStarted(_quizId, _questions);
     }
 
     function submitCorrectAnswers(
         uint256 _quizId,
         uint8[noOfQuestions] calldata _quizAnswers,
-        string calldata _hashSalt
+        bytes32 _hashSalt
     ) external onlyOwners(_quizId) {
         require(_quizId < quizzes.length, "Quiz does not exist");
+        require(quizzes[_quizId].isRunning == true, "Quiz has not started");
         require(
             block.timestamp >
                 quizzes[_quizId].startTime + quizzes[_quizId].duration,
@@ -274,7 +294,7 @@ contract QuizContract {
         uint8[noOfQuestions] calldata _answers
     ) external {
         require(
-            quizzes[_quizId].startTime <= block.timestamp,
+            quizzes[_quizId].isRunning == true,
             "Quiz has not started yet"
         );
         require(
