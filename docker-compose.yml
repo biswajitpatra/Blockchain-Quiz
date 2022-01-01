@@ -10,7 +10,8 @@ services:
 
   gcloud-tasks-emulator:
     image: ghcr.io/aertje/cloud-tasks-emulator:latest
-    command: -host 0.0.0.0 -port 8123 -queue "projects/dev/locations/here/queues/anotherq"
+    container_name: gcp-tasks-emulator
+    command: -host 0.0.0.0 -port 8123 -queue "projects/dev/locations/here/queues/contract-caller"
     ports:
       - "${TASKS_PORT:-8123}:8123"
       
@@ -37,3 +38,12 @@ services:
     volumes:
       - .:/app
       - /app/client/node_modules
+    environment:
+      - ETH_NODE_URL=http://ganache-cli:8545
+      - ETH_PUBLIC_KEY=0x08302CF8648A961c607e3e7Bd7B7Ec3230c2A6c5
+      - ETH_PRIVATE_KEY=873c254263b17925b686f971d7724267710895f1585bb0533db8e693a2af32ff
+      - GCP_HOST=gcp-tasks-emulator
+      - GCP_PROJECT_ID=dev
+      - GCP_PROJECT_LOCATION=here
+      - GCP_QUEUE_NAME=contract-caller
+      - CLIENT_URL=http://client:3000
