@@ -37,7 +37,7 @@ export default function OrganizerUploadForm({ formData }) {
   const [progress, setProgress] = useState(0);
   const [message, setMessage] = useState("");
   const { account, library } = useWeb3React();
-  const noOfSteps = 3;
+  const noOfSteps = 5;
 
   const updateProgress = (value) => {
     setProgress((value * 100) / noOfSteps);
@@ -54,10 +54,16 @@ export default function OrganizerUploadForm({ formData }) {
   }
 
   useEffect(async () => {
-    const web3js = new Web3(library);
-    const QuizContract = new web3js.eth.Contract(quizABI.abi, contractAddress);
+    if (!account) {
+      return;
+    }
+
+    const web3 = new Web3(library);
+    const QuizContract = new web3.eth.Contract(quizABI.abi, contractAddress);
     let questions = [];
     let answers = [];
+
+    console.log(formData);
     for (let i = 0; i < formData.questions.length; i++) {
       questions.push({
         question: formData.questions[i].question,
@@ -65,26 +71,28 @@ export default function OrganizerUploadForm({ formData }) {
       });
       answers.push(formData.questions[i].correctOption);
     }
-    let encodedQuestions = web3js.eth.abi.encodeParameter(
+    let encodedQuestions = web3.eth.abi.encodeParameter(
       { "questions[]": { question: "string", options: "string[]" } },
       questions
     );
 
     let hashSalt = "0x" + randomString(64);
-    let encodedAnswers = web3js.eth.abi.encodeParameters(
+    let encodedAnswers = web3.eth.abi.encodeParameters(
       ["uint8[]", "bytes32"],
       [answers, hashSalt.toString()]
     );
 
-    await QuizContract.methods
+    let isSuccess;
+
+    let receipt = await QuizContract.methods
       .createQuiz(
         formData.quizName,
         formData.description,
         formData.prizeMoney,
         Math.floor(formData.startTime / 1000),
         formData.duration * 60,
-        web3js.utils.soliditySha3(encodedQuestions),
-        web3js.utils.soliditySha3(encodedAnswers)
+        web3.utils.soliditySha3(encodedQuestions),
+        web3.utils.soliditySha3(encodedAnswers)
       )
       .send({ from: account, value: formData.prizeMoney })
       .on("sending", (p) => {
@@ -96,17 +104,60 @@ export default function OrganizerUploadForm({ formData }) {
         updateProgress(2);
       })
       .on("receipt", (receipt) => {
-        setMessage("Successfully created quiz");
+        isSuccess = true;
+        setMessage("Quiz added to contracts");
         console.log(receipt);
         updateProgress(3);
       })
       .on("error", (error, receipt) => {
+        isSuccess = false;
         console.log(error, receipt);
         setMessage(error.message);
       });
 
-    // router.push("/quiz");
-  }, []);
+    if (!isSuccess) {
+      return;
+    }
+
+    if (formData.automate === true) {
+      const signedToken = await web3.eth.personal.sign(
+        receipt.transactionHash,
+        account
+      );
+
+      updateProgress(4);
+      setMessage("Setting up quiz...");
+      const response = await fetch("/api/quiz", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          transactionHash: receipt.transactionHash,
+          signedToken,
+          questions,
+          answers,
+          hashSalt,
+        }),
+      });
+
+      if (response.status !== 200) {
+        setMessage(response.error);
+        isSuccess = false;
+        return;
+      }
+      console.log(response);
+    } else {
+      const quizId = receipt.events.QuizCreated.returnValues.quizId;
+      localStorage.setItem(`${quizId}-questions`, JSON.stringify(questions));
+      localStorage.setItem(`${quizId}-answers`, JSON.stringify(answers));
+    }
+
+    updateProgress(5);
+    setMessage("Quiz created successfully");
+
+    router.push("/organizer");
+  }, [account]);
 
   return (
     <>
