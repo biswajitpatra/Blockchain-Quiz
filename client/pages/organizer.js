@@ -74,7 +74,6 @@ export default function Organizer() {
       >
         <Head>
           <title> Quiz App</title>
-          <link rel="icon" href="/favicon.ico" />
         </Head>
 
         <h1 className="sticky top-0 text-3xl md:text-4xl font-bold text-center">

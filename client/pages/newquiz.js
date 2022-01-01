@@ -45,7 +45,6 @@ export default function NewQuiz() {
       >
         <Head>
           <title> Quiz App</title>
-          <link rel="icon" href="/favicon.ico" />
         </Head>
 
         <main className="flex flex-col place-content-center w-full flex-1 px-20 md:w-3/4">
