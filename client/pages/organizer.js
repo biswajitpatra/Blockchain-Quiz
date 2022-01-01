@@ -90,7 +90,7 @@ export default function Organizer() {
         </Link>
 
         <div className="p-10 grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 gap-5">
-          {quizzesByUser ? (
+          {quizzesByUser.length ? (
             quizzesByUser.map((q, i) => (
               <a
                 className="w-full lg:max-w-full lg:flex hover:shadow shadow-xl duration-100 border-2 border-gray-400 rounded-xl p-1"
@@ -123,7 +123,7 @@ export default function Organizer() {
               </a>
             ))
           ) : (
-            <div className="text-center">No quizzes yet</div>
+            <div className="place-content-center font-bold">No quizzes yet 😢</div>
           )}
         </div>
       </motion.div>

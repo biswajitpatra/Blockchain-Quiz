@@ -147,6 +147,22 @@ export default function QuizDetailForm({ updateFormData }) {
           />
         </div>
 
+        <div className="mb-4">
+          <input
+            {...register("automate")}
+            required
+            defaultChecked={true}
+            type="checkbox"
+            id="automate"
+          />
+          <label className="text-gray-700 font-bold mb-2" htmlFor="automate">
+            {" "}
+            Add schedulers for calling the contract? (This will automatically
+            call the contract for you or you mave to manually call the contract
+            during start and end of the quiz )
+          </label>
+        </div>
+
         <div className="flex items-center justify-between">
           <button
             className="transition ease-in-out duration-300 bg-blue-500 hover:bg-indigo-500 hover:scale-105 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
