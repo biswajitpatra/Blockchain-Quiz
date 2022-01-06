@@ -1,7 +1,7 @@
 import { useForm, useFieldArray } from "react-hook-form";
 import { motion } from "framer-motion";
 import QuestionAccordian from "./QuestionAccordian";
-import { NO_OF_QUESTIONS } from "../config";
+import { NO_OF_QUESTIONS, NO_OF_OPTIONS } from "../config";
 
 const ease = [0.43, 0.13, 0.23, 0.96];
 const stepVariants = {
@@ -27,10 +27,11 @@ const stepVariants = {
 
 export default function QuestionForm({ updateFormData }) {
   const initialQuestions = [];
+  const initialOptions = new Array(NO_OF_OPTIONS).fill("");
   for (let i = 0; i < NO_OF_QUESTIONS; i++) {
     initialQuestions.push({
       question: "",
-      options: ["", "", "", ""],
+      options: initialOptions,
       correctOption: null,
     });
   }

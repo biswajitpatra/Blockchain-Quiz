@@ -1,5 +1,5 @@
-import { contractAddress } from "../config";
 import Web3 from "web3";
+import quizJSON from "../../build/contracts/QuizContract.json";
 
 const authMiddleware = (handler) => {
   return async (req, res) => {
@@ -18,6 +18,8 @@ const authMiddleware = (handler) => {
       const transactionReceipt = await web3.eth.getTransactionReceipt(
         transactionHash
       );
+      const networkId = await web3.eth.net.getId();
+      const contractAddress = quizJSON.networks[networkId].address;
       if (
         address.toLowerCase() !== transactionReceipt.from ||
         transactionReceipt.to !== contractAddress.toLowerCase()

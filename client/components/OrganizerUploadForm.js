@@ -5,8 +5,7 @@ import "react-step-progress-bar/styles.css";
 import { ProgressBar, Step } from "react-step-progress-bar";
 import Web3 from "web3";
 import { useState, useEffect } from "react";
-import quizABI from "../../build/contracts/QuizContract.json";
-import { contractAddress } from "../config";
+import getQuizContract from "../utils/getQuizContract";
 import { useWeb3React } from "@web3-react/core";
 import WalletModal from "./WalletModal";
 
@@ -59,7 +58,7 @@ export default function OrganizerUploadForm({ formData }) {
     }
 
     const web3 = new Web3(library);
-    const QuizContract = new web3.eth.Contract(quizABI.abi, contractAddress);
+    const QuizContract = await getQuizContract(web3);
     let questions = [];
     let answers = [];
 
@@ -147,11 +146,10 @@ export default function OrganizerUploadForm({ formData }) {
         return;
       }
       console.log(response);
-    } else {
-      const quizId = receipt.events.QuizCreated.returnValues.quizId;
-      localStorage.setItem(`${quizId}-questions`, JSON.stringify(questions));
-      localStorage.setItem(`${quizId}-answers`, JSON.stringify(answers));
     }
+    const quizId = receipt.events.QuizCreated.returnValues.quizId;
+    localStorage.setItem(`${quizId}-questions`, JSON.stringify(questions));
+    localStorage.setItem(`${quizId}-answers`, JSON.stringify(answers));
 
     updateProgress(5);
     setMessage("Quiz created successfully");

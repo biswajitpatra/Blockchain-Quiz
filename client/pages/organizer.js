@@ -3,8 +3,7 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import Web3 from "web3";
-import quizABI from "../../build/contracts/QuizContract.json";
-import { contractAddress } from "../config";
+import getQuizContract from "../utils/getQuizContract";
 import { useWeb3React } from "@web3-react/core";
 import WalletModal from "../components/WalletModal";
 
@@ -31,8 +30,6 @@ const pageVariants = {
 export default function Organizer() {
   const [quizzesByUser, setQuizzes] = useState([]);
   const { account, library } = useWeb3React();
-  const web3js = new Web3(library);
-  const QuizContract = new web3js.eth.Contract(quizABI.abi, contractAddress);
 
   const getStatus = (quiz) => {
     const now = new Date().getTime() / 1000;
@@ -59,6 +56,8 @@ export default function Organizer() {
 
   useEffect(async () => {
     if (account) {
+      const web3 = new Web3(library);
+      const QuizContract = await getQuizContract(web3);
       setQuizzes(
         await QuizContract.methods.getQuizzesBy(account).call({ from: account })
       );
@@ -78,15 +77,15 @@ export default function Organizer() {
 
         <h1 className="sticky top-0 text-3xl md:text-4xl font-bold text-center">
           <div className="text-blue-600"> Your Quizzes </div>
+          <Link href="/newquiz">
+            <a
+              type="button"
+              className="bg-blue-500 text-white font-bold p-2 rounded-xl hover:ring mt-3 text-lg"
+            >
+              + Create quiz
+            </a>
+          </Link>
         </h1>
-        <Link href="/newquiz">
-          <a
-            type="button"
-            className="sticky top-0 bg-blue-500 text-white font-bold p-2 rounded-xl hover:ring mt-3"
-          >
-            + Create quiz
-          </a>
-        </Link>
 
         <div className="p-10 grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 gap-5">
           {quizzesByUser.length ? (
@@ -122,7 +121,9 @@ export default function Organizer() {
               </a>
             ))
           ) : (
-            <div className="place-content-center font-bold">No quizzes yet 😢</div>
+            <div className="place-content-center font-bold">
+              No quizzes yet 😢
+            </div>
           )}
         </div>
       </motion.div>

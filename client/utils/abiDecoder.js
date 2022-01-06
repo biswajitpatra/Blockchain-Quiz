@@ -1,12 +1,12 @@
-import quizABI from "../../build/contracts/QuizContract.json";
+import quizJSON from "../../build/contracts/QuizContract.json";
 import Web3 from "web3";
 
 const web3 = new Web3();
-const quizCreatedInputs = quizABI.abi.find(
+const quizCreatedInputs = quizJSON.abi.find(
   (i) => i.type === "event" && i.name === "QuizCreated"
 ).inputs;
 
-const quizUpdatedEvents = quizABI.abi.find(
+const quizUpdatedEvents = quizJSON.abi.find(
   (i) => i.type === "event" && i.name === "QuizUpdated"
 ).inputs;
 

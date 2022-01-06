@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import { NO_OF_OPTIONS } from "../config";
 
 const item = {
   initial: { opacity: 0 },
@@ -53,82 +54,32 @@ export default function QuestionAccordian({ questionNo, questionRegister }) {
             placeholder="Type your question here"
           />
           <div className="grid grid-cols-2 gap-3 p-2">
-            <div className="flex">
-              <input
-                {...questionRegister(`questions.${questionNo}.correctOption`, {
-                  required: true,
-                })}
-                value={0}
-                type="radio"
-                className="place-self-center m-1"
-                name={`questions.${questionNo}.correctOption`}
-                required
-              />
-              <input
-                {...questionRegister(`questions.${questionNo}.options.0`)}
-                required
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring focus:border-blue-500"
-                type="text"
-                placeholder="Options"
-              />
-            </div>
-            <div className="flex">
-              <input
-                {...questionRegister(`questions.${questionNo}.correctOption`, {
-                  required: true,
-                })}
-                value={1}
-                type="radio"
-                className="place-self-center m-1"
-                name={`questions.${questionNo}.correctOption`}
-                required
-              />
-              <input
-                {...questionRegister(`questions.${questionNo}.options.1`)}
-                required
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring focus:border-blue-500"
-                type="text"
-                placeholder="Options"
-              />
-            </div>
-            <div className="flex">
-              <input
-                {...questionRegister(`questions.${questionNo}.correctOption`, {
-                  required: true,
-                })}
-                value={2}
-                type="radio"
-                className="place-self-center m-1"
-                name={`questions.${questionNo}.correctOption`}
-                required
-              />
-              <input
-                {...questionRegister(`questions.${questionNo}.options.2`)}
-                required
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring focus:border-blue-500"
-                type="text"
-                placeholder="Options"
-              />
-            </div>
-            <div className="flex">
-              <input
-                {...questionRegister(`questions.${questionNo}.correctOption`, {
-                  required: true,
-                })}
-                value={3}
-                type="radio"
-                className="place-self-center m-1"
-                name={`questions.${questionNo}.correctOption`}
-                required
-              />
-              <input
-                {...questionRegister(`questions.${questionNo}.options.3`)}
-                required
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring focus:border-blue-500"
-                type="text"
-                placeholder="Options"
-              />
-            </div>
+            {[...Array(NO_OF_OPTIONS)].map((_, index) => (
+              <div className="flex" key={index}>
+                <input
+                  {...questionRegister(
+                    `questions.${questionNo}.correctOption`,
+                    {
+                      required: true,
+                    }
+                  )}
+                  value={index}
+                  type="radio"
+                  className="place-self-center m-1"
+                  name={`questions.${questionNo}.correctOption`}
+                  required
+                />
+                <input
+                  {...questionRegister(
+                    `questions.${questionNo}.options.${index}`
+                  )}
+                  required
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring focus:border-blue-500"
+                  type="text"
+                  placeholder="Options"
+                />
+              </div>
+            ))}
           </div>
         </div>
       </div>

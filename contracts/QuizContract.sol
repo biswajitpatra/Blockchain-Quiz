@@ -141,7 +141,7 @@ contract QuizContract {
         }
         return quizzesByUser;
     }
-    
+
     function createQuiz(
         string calldata quizName,
         string calldata description,
@@ -293,10 +293,7 @@ contract QuizContract {
         uint256 _quizId,
         uint8[noOfQuestions] calldata _answers
     ) external {
-        require(
-            quizzes[_quizId].isRunning == true,
-            "Quiz has not started yet"
-        );
+        require(quizzes[_quizId].isRunning == true, "Quiz has not started yet");
         require(
             quizzes[_quizId].startTime + quizzes[_quizId].duration >=
                 block.timestamp,

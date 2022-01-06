@@ -106,7 +106,7 @@ export default function QuizDetailForm({ updateFormData }) {
                   required
                   amPmAriaLabel="Select AM/PM"
                   calendarAriaLabel="Toggle calendar"
-                  clearAriaLabel="Clear value"
+                  clearIcon={null}
                   dayAriaLabel="Day"
                   hourAriaLabel="Hour"
                   maxDetail="second"
@@ -150,7 +150,6 @@ export default function QuizDetailForm({ updateFormData }) {
         <div className="mb-4">
           <input
             {...register("automate")}
-            required
             defaultChecked={true}
             type="checkbox"
             id="automate"

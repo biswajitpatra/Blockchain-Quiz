@@ -4,22 +4,28 @@ services:
   ganache-cli:
     image: trufflesuite/ganache-cli:latest
     container_name: ganache-cli
-    command: node /app/ganache-core.docker.cli.js --quiet --networkId 1337 --account="0x873c254263b17925b686f971d7724267710895f1585bb0533db8e693a2af32ff,100000000000000000000" --account="0x8c0ba8fece2e596a9acfc56c6c1bf57b6892df2cf136256dfcb49f6188d67940,100000000000000000000"
+    command: node /app/ganache-core.docker.cli.js --quiet --networkId 1337
+      --account="0x873c254263b17925b686f971d7724267710895f1585bb0533db8e693a2af32ff,100000000000000000000"
+      --account="0x8c0ba8fece2e596a9acfc56c6c1bf57b6892df2cf136256dfcb49f6188d67940,100000000000000000000"
     ports:
       - 8545:8545
 
   gcloud-tasks-emulator:
     image: ghcr.io/aertje/cloud-tasks-emulator:latest
     container_name: gcp-tasks-emulator
-    command: -host 0.0.0.0 -port 8123 -queue "projects/dev/locations/here/queues/contract-caller"
+    command: -host 0.0.0.0 -port 8123 -queue
+      "projects/dev/locations/here/queues/contract-caller"
     ports:
       - "${TASKS_PORT:-8123}:8123"
-      
+
   client:
     build:
       context: .
+    container_name: nextjs-client
     healthcheck:
-      test: curl -sf -X POST --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' localhost:8545
+      test: curl -sf -X POST --data
+        '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'
+        localhost:8545
       interval: 5s
       timeout: 5s
       retries: 5
@@ -41,9 +47,9 @@ services:
     environment:
       - ETH_NODE_URL=http://ganache-cli:8545
       - ETH_PUBLIC_KEY=0x08302CF8648A961c607e3e7Bd7B7Ec3230c2A6c5
-      - ETH_PRIVATE_KEY=873c254263b17925b686f971d7724267710895f1585bb0533db8e693a2af32ff
+      - ETH_PRIVATE_KEY=0x873c254263b17925b686f971d7724267710895f1585bb0533db8e693a2af32ff
       - GCP_HOST=gcp-tasks-emulator
       - GCP_PROJECT_ID=dev
       - GCP_PROJECT_LOCATION=here
       - GCP_QUEUE_NAME=contract-caller
-      - CLIENT_URL=http://client:3000
+      - CLIENT_URL=http://nextjs-client:3000
