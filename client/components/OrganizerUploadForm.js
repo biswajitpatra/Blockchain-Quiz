@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import getQuizContract from "../utils/getQuizContract";
 import { useWeb3React } from "@web3-react/core";
 import WalletModal from "./WalletModal";
+import { NO_OF_OPTIONS, NO_OF_QUESTIONS } from "../config.js";
 
 const ease = [0.43, 0.13, 0.23, 0.96];
 const stepVariants = {
@@ -60,25 +61,28 @@ export default function OrganizerUploadForm({ formData }) {
     const web3 = new Web3(library);
     const QuizContract = await getQuizContract(web3);
     let questions = [];
+    let options = [];
     let answers = [];
 
     console.log(formData);
     for (let i = 0; i < formData.questions.length; i++) {
-      questions.push({
-        question: formData.questions[i].question,
-        options: formData.questions[i].options,
-      });
+      questions.push(formData.questions[i].question);
+      options.push(formData.questions[i].options);
       answers.push(formData.questions[i].correctOption);
     }
-    let encodedQuestions = web3.eth.abi.encodeParameter(
-      { "questions[]": { question: "string", options: "string[]" } },
-      questions
-    );
 
     let hashSalt = "0x" + randomString(64);
-    let encodedAnswers = web3.eth.abi.encodeParameters(
-      ["uint8[]", "bytes32"],
-      [answers, hashSalt.toString()]
+    const encodedQuestions = web3.eth.abi.encodeParameters(
+      [
+        `string[${NO_OF_QUESTIONS}]`,
+        `string[${NO_OF_QUESTIONS}][${NO_OF_OPTIONS}]`,
+        `bytes32`,
+      ],
+      [questions, options, hashSalt]
+    );
+    const encodedAnswers = web3.eth.abi.encodeParameters(
+      [`uint8[${NO_OF_QUESTIONS}]`, "bytes32"],
+      [answers, hashSalt]
     );
 
     let isSuccess;
@@ -90,8 +94,8 @@ export default function OrganizerUploadForm({ formData }) {
         formData.prizeMoney,
         Math.floor(formData.startTime / 1000),
         formData.duration * 60,
-        web3.utils.soliditySha3(encodedQuestions),
-        web3.utils.soliditySha3(encodedAnswers)
+        web3.utils.keccak256(encodedQuestions),
+        web3.utils.keccak256(encodedAnswers)
       )
       .send({ from: account, value: formData.prizeMoney })
       .on("sending", (p) => {
@@ -135,6 +139,7 @@ export default function OrganizerUploadForm({ formData }) {
           transactionHash: receipt.transactionHash,
           signedToken,
           questions,
+          options,
           answers,
           hashSalt,
         }),
@@ -145,11 +150,12 @@ export default function OrganizerUploadForm({ formData }) {
         isSuccess = false;
         return;
       }
-      console.log(response);
     }
     const quizId = receipt.events.QuizCreated.returnValues.quizId;
     localStorage.setItem(`${quizId}-questions`, JSON.stringify(questions));
+    localStorage.setItem(`${quizId}-options`, JSON.stringify(options));
     localStorage.setItem(`${quizId}-answers`, JSON.stringify(answers));
+    localStorage.setItem(`${quizId}-hashSalt`, hashSalt);
 
     updateProgress(5);
     setMessage("Quiz created successfully");
