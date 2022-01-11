@@ -90,35 +90,33 @@ export default function Organizer() {
         <div className="p-10 grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 gap-5">
           {quizzesByUser.length ? (
             quizzesByUser.map((q, i) => (
-              <a
-                className="w-full lg:max-w-full lg:flex hover:shadow shadow-xl duration-100 border-2 border-gray-400 rounded-xl p-1"
-                key={i}
-                href={`/quiz/${q.quizId}`}
-              >
-                <div className=" bg-white p-4 flex flex-col justify-between leading-normal">
-                  <div className="mb-8">
-                    {getStatus(q)}
-                    <div className="text-gray-900 font-bold text-xl mb-2">
-                      {q.quizName}
-                    </div>
-                    <p className="text-gray-700 text-base">
-                      {q.description || "No description"}
-                    </p>
-                    <p className="text-base">
-                      Prize Money: <b>{q.prizeMoney} Wei</b>
-                    </p>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="text-sm">
-                      <p className="text-gray-900 leading-none">
-                        {" "}
-                        {new Date(q.startTime * 1000).toDateString()}
+              <Link key={i} href={`/quiz/${q.quizId}`}>
+                <div className="w-full lg:max-w-full lg:flex hover:shadow shadow-xl duration-100 border-2 border-gray-400 rounded-xl p-1 cursor-pointer">
+                  <div className=" bg-white p-4 flex flex-col justify-between leading-normal">
+                    <div className="mb-8">
+                      {getStatus(q)}
+                      <div className="text-gray-900 font-bold text-xl mb-2">
+                        {q.quizName}
+                      </div>
+                      <p className="text-gray-700 text-base">
+                        {q.description || "No description"}
                       </p>
-                      <p className="text-gray-600"> {q.duration / 60} mins</p>
+                      <p className="text-base">
+                        Prize Money: <b>{q.prizeMoney} Wei</b>
+                      </p>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="text-sm">
+                        <p className="text-gray-900 leading-none">
+                          {" "}
+                          {new Date(q.startTime * 1000).toDateString()}
+                        </p>
+                        <p className="text-gray-600"> {q.duration / 60} mins</p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </a>
+              </Link>
             ))
           ) : (
             <div className="place-content-center font-bold">
