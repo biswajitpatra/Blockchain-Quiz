@@ -1,3 +1,3 @@
 export default function handler(req, res) {
-  res.send("sent answers");
+  res.send("Hello World");
 }

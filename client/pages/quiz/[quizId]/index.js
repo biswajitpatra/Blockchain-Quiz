@@ -44,7 +44,7 @@ export default function QuizDetails() {
 
   const getStatus = (quiz) => {
     const now = new Date().getTime() / 1000;
-    if (quiz.isRunning && quiz.startTime + quiz.duration < now) {
+    if (quiz.isRunning && parseInt(quiz.startTime) + parseInt(quiz.duration) < now) {
       return (
         <span className="text-sm text-white font-bold p-1 items-center rounded-md bg-blue-500">
           Completed
@@ -121,7 +121,7 @@ export default function QuizDetails() {
               </div>
               <div className="text-left mx-3">
                 <span className="font-bold">Duration: </span>
-                {quizDetails.duration} mins
+                {quizDetails.duration / 60} mins
               </div>
               <div className="text-left mx-3">
                 <span className="font-bold">Start Time: </span>
