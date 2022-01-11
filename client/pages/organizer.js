@@ -33,7 +33,7 @@ export default function Organizer() {
 
   const getStatus = (quiz) => {
     const now = new Date().getTime() / 1000;
-    if (quiz.isRunning && quiz.startTime + quiz.duration > now) {
+    if (quiz.isRunning && quiz.startTime + quiz.duration < now) {
       return (
         <span className="text-sm text-white font-bold p-1 items-center rounded-md bg-blue-500">
           Completed

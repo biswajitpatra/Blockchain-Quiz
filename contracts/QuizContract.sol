@@ -214,7 +214,7 @@ contract QuizContract {
         string[noOfQuestions] calldata _questions,
         string[noOfQuestions][noOfOptions] calldata _options,
         bytes32 _hashSalt
-    ) external onlyOwners(_quizId) refundGas(_quizId) {
+    ) external onlyOwners(_quizId){
         require(
             quizzes[_quizId].isRunning == false,
             "Quiz has already started"
