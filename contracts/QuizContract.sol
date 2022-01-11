@@ -3,13 +3,17 @@ pragma solidity >=0.8.10;
 
 contract QuizContract {
     uint8 constant noOfQuestions = 1;
-    uint8 constant noOfOptions = 4;
+    uint8 constant noOfOptions = 1;
 
     event QuizCreated(uint256 quizId, Quiz quiz);
 
     event QuizUpdated(uint256 quizId, Quiz quiz);
 
-    event QuizStarted(uint256 quizId, Question[noOfQuestions] questions);
+    event QuizStarted(
+        uint256 quizId,
+        string[noOfQuestions] questions,
+        string[noOfQuestions][noOfOptions] options
+    );
 
     event QuizCompleted(
         uint256 quizId,
@@ -17,11 +21,6 @@ contract QuizContract {
         address[] winners,
         uint8[noOfQuestions] answers
     );
-
-    struct Question {
-        string question;
-        string[noOfOptions] options;
-    }
 
     struct Answers {
         uint8[noOfQuestions] selectedOptions;
@@ -69,19 +68,19 @@ contract QuizContract {
         quizzes[_quizId].prizeMoney -= gasCost;
     }
 
-    function hashQuestions(Question[noOfQuestions] calldata questions)
-        internal
-        pure
-        returns (bytes32)
-    {
-        return keccak256(abi.encode(questions));
+    function hashQuestions(
+        string[noOfQuestions] calldata _questions,
+        string[noOfQuestions][noOfOptions] calldata _options,
+        bytes32 _hashSalt 
+    ) internal pure returns (bytes32) {
+        return keccak256(abi.encode(_questions, _options, _hashSalt));
     }
 
     function hashAnswers(
-        uint8[noOfQuestions] calldata answers,
+        uint8[noOfQuestions] calldata _answers,
         bytes32 _hashSalt
     ) internal pure returns (bytes32) {
-        return keccak256(abi.encode(answers, _hashSalt));
+        return keccak256(abi.encode(_answers, _hashSalt));
     }
 
     function equalAnswers(
@@ -212,29 +211,35 @@ contract QuizContract {
 
     function submitQuestions(
         uint256 _quizId,
-        Question[noOfQuestions] calldata _questions
+        string[noOfQuestions] calldata _questions,
+        string[noOfQuestions][noOfOptions] calldata _options,
+        bytes32 _hashSalt
     ) external onlyOwners(_quizId) refundGas(_quizId) {
-        require(quizzes[_quizId].isRunning == false, "Quiz has already started");
+        require(
+            quizzes[_quizId].isRunning == false,
+            "Quiz has already started"
+        );
         for (uint256 i = 0; i < _questions.length; i++) {
             require(
-                bytes(_questions[i].question).length != 0,
+                bytes(_questions[i]).length != 0,
                 "Question cannot be empty"
             );
-            for (uint256 j = 0; j < _questions[i].options.length; j++) {
+            for (uint256 j = 0; j < _options[i].length; j++) {
                 require(
-                    bytes(_questions[i].options[j]).length != 0,
+                    bytes(_options[i][j]).length != 0,
                     "Option cannot be empty"
                 );
             }
         }
         require(
-            hashQuestions(_questions) == quizzes[_quizId].questionHash,
+            hashQuestions(_questions, _options, _hashSalt) ==
+                quizzes[_quizId].questionHash,
             "Questions are not valid"
         );
 
         quizzes[_quizId].startTime = block.timestamp;
         quizzes[_quizId].isRunning = true;
-        emit QuizStarted(_quizId, _questions);
+        emit QuizStarted(_quizId, _questions, _options);
     }
 
     function submitCorrectAnswers(
