@@ -69,18 +69,14 @@ export default function QuizDetails() {
     if (!account) {
       return;
     }
-    const questions = localStorage.getItem(`${quizId}-questions`);
-    const options = localStorage.getItem(`${quizId}-options`);
+    const questions = JSON.parse(localStorage.getItem(`${quizId}-questions`));
+    const options = JSON.parse(localStorage.getItem(`${quizId}-options`));
     const hashSalt = localStorage.getItem(`${quizId}-hashSalt`);
     if (questions === null) {
       // TODO: Show error and re fill the questions
       console.error("No questions found for this quizId");
       return;
     }
-
-    questions = JSON.parse(questions);
-    options = JSON.parse(options);
-    console.log(quizId, questions, options, hashSalt);
 
     const web3 = new Web3(library);
     const QuizContract = await getQuizContract(web3);

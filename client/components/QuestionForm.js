@@ -13,10 +13,7 @@ const stepVariants = {
   animate: {
     y: "0%",
     opacity: 1,
-    transition: { ease, duration: 0.8 },
-    transition: {
-      staggerChildren: 0.5,
-    },
+    transition: { ease, duration: 0.8, staggerChildren: 0.5 },
   },
   exit: {
     y: "50%",
@@ -40,13 +37,10 @@ export default function QuestionForm({ updateFormData }) {
       questions: initialQuestions,
     },
   });
-  const { fields } = useFieldArray(
-    {
-      control,
-      name: "questions",
-    }
-  );
-
+  const { fields } = useFieldArray({
+    control,
+    name: "questions",
+  });
 
   return (
     <motion.div variants={stepVariants}>

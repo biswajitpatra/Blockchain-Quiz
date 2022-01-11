@@ -21,9 +21,6 @@ const stepVariants = {
     y: "0%",
     opacity: 1,
     transition: { ease, duration: 0.8 },
-    transition: {
-      staggerChildren: 0.5,
-    },
   },
   exit: {
     y: "50%",

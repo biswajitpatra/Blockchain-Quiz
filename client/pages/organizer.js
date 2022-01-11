@@ -1,6 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import Web3 from "web3";
 import getQuizContract from "../utils/getQuizContract";
