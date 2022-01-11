@@ -139,6 +139,7 @@ export default function OrganizerUploadForm({ formData }) {
           transactionHash: receipt.transactionHash,
           signedToken,
           questions,
+          options,
           answers,
           hashSalt,
         }),
@@ -149,7 +150,6 @@ export default function OrganizerUploadForm({ formData }) {
         isSuccess = false;
         return;
       }
-      console.log(response);
     }
     const quizId = receipt.events.QuizCreated.returnValues.quizId;
     localStorage.setItem(`${quizId}-questions`, JSON.stringify(questions));

@@ -71,7 +71,7 @@ contract QuizContract {
     function hashQuestions(
         string[noOfQuestions] calldata _questions,
         string[noOfQuestions][noOfOptions] calldata _options,
-        bytes32 _hashSalt 
+        bytes32 _hashSalt
     ) internal pure returns (bytes32) {
         return keccak256(abi.encode(_questions, _options, _hashSalt));
     }
@@ -214,7 +214,7 @@ contract QuizContract {
         string[noOfQuestions] calldata _questions,
         string[noOfQuestions][noOfOptions] calldata _options,
         bytes32 _hashSalt
-    ) external onlyOwners(_quizId){
+    ) external onlyOwners(_quizId) {
         require(
             quizzes[_quizId].isRunning == false,
             "Quiz has already started"
@@ -270,7 +270,20 @@ contract QuizContract {
                 totalWinners++;
             }
         }
+
         address[] memory winners = new address[](totalWinners);
+        if (totalWinners == 0) {
+            payable(quizzes[_quizId].quizOwner).transfer(
+                quizzes[_quizId].prizeMoney
+            );
+            emit QuizCompleted(
+                _quizId,
+                quizzes[_quizId],
+                winners,
+                _quizAnswers
+            );
+            return;
+        }
         uint256 prizeMoneyPerWinner = quizzes[_quizId].prizeMoney /
             totalWinners;
         uint256 prizeMoneyLeft = quizzes[_quizId].prizeMoney -

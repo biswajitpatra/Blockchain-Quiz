@@ -23,6 +23,7 @@ export async function addQuizTask(
   quizId,
   startTime,
   questions,
+  options,
   duration,
   answers,
   hashSalt
@@ -41,7 +42,13 @@ export async function addQuizTask(
           "Content-Type": "application/json",
         },
         body: Buffer.from(
-          JSON.stringify({ questions, transactionHash, signedToken })
+          JSON.stringify({
+            questions,
+            options,
+            hashSalt,
+            transactionHash,
+            signedToken,
+          })
         ).toString("base64"),
       },
     },
@@ -51,10 +58,10 @@ export async function addQuizTask(
     parent: parent,
     task: {
       name: `projects/${process.env.GCP_PROJECT_ID}/locations/${process.env.GCP_PROJECT_LOCATION}/queues/${process.env.GCP_QUEUE_NAME}/tasks/${uniqueTaskId}-end`,
-      scheduleTime: { seconds: parseInt(startTime) + parseInt(duration) },
+      scheduleTime: { seconds: parseInt(startTime) + parseInt(duration) + 1}, // Delay of 1 second to ensure that the quiz endtime does not collide
       httpRequest: {
         httpMethod: "POST",
-        url: `${process.env.CLIENT_URL}/api/quiz/${quizId}/sendAnswers`,
+        url: `${process.env.CLIENT_URL}/api/quiz/${quizId}/sendCorrectAnswers`,
         headers: {
           "Content-Type": "application/json",
         },
