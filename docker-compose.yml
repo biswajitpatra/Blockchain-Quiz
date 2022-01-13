@@ -4,6 +4,8 @@ services:
   ganache-cli:
     image: trufflesuite/ganache-cli:latest
     container_name: ganache-cli
+    # First address is used as server's address
+    # Import second address to metamask
     command: node /app/ganache-core.docker.cli.js --quiet --networkId 1337
       --account="0x873c254263b17925b686f971d7724267710895f1585bb0533db8e693a2af32ff,100000000000000000000"
       --account="0x8c0ba8fece2e596a9acfc56c6c1bf57b6892df2cf136256dfcb49f6188d67940,100000000000000000000"
@@ -53,3 +55,10 @@ services:
       - GCP_PROJECT_LOCATION=here
       - GCP_QUEUE_NAME=contract-caller
       - CLIENT_URL=http://nextjs-client:3000
+
+  githook_installer:
+    build:
+      dockerfile: 'Dockerfile.githooks'
+    volumes:
+      - ./.git:/tmp/.git
+      - ./hooks:/tmp/hooks

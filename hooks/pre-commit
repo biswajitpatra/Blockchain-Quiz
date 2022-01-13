@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+# get all .js files from the commit
+stagedfiles=$(git diff --cached --name-only --diff-filter=ACM | grep '\.\(js\|jsx\|json\|html\)$')
+lintfiles=$(echo "${stagedfiles}" | grep '^client/' | cut -d'/' -f2- | tr '\n' ' ')
+jsfiles=$(echo "${stagedfiles}" | grep '^client/' | grep '\.\(js\|jsx\)$' | cut -d'/' -f2- | tr '\n' ' ')
+stagedfiles=$(echo "${stagedfiles}" | tr '\n' ' ')
+
+# return if there are no .js files in this commit
+[ -z "$lintfiles" ] && exit 0
+
+# Running eslint on staged files
+echo "Linting with eslint..."
+docker exec -t nextjs-client bash -c "cd client && npx eslint --fix ${jsfiles}"
+
+if [ $? -ne 0 ]; then
+  echo "Eslint failed. Please fix the errors by 'npx eslint --fix .' in the directory"
+  exit 1
+fi
+
+# Running prettier on staged files
+echo "Linting with prettier..."
+docker exec -t nextjs-client bash -c "cd client && npx prettier --write ${lintfiles}"
+
+if [ $? -ne 0 ]; then
+  echo "Prettier failed. Please fix the errors by 'npx prettier --write .' in the directory"
+  exit 1
+fi
+
+echo "No linting errors found."
+
+git add $stagedfiles
