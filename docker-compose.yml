@@ -57,8 +57,7 @@ services:
       - CLIENT_URL=http://nextjs-client:3000
 
   githook_installer:
-    build:
-      dockerfile: 'Dockerfile.githooks'
+    image: sourceboat/docker-compose-githooks:latest
     volumes:
       - ./.git:/tmp/.git
-      - ./hooks:/tmp/hooks
+      - ./.githooks:/tmp/.githooks
