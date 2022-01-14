@@ -40,7 +40,7 @@ export default function OrganizerUploadForm({ formData }) {
         setProgress((value * 100) / noOfSteps);
     };
 
-    function randomString(length) {
+    const randomString = (length) => {
         let result = '';
         let characters = 'abcdef0123456789';
         let charactersLength = characters.length;
@@ -50,7 +50,7 @@ export default function OrganizerUploadForm({ formData }) {
             );
         }
         return result;
-    }
+    };
 
     useEffect(() => {
         async function callContract() {
@@ -75,7 +75,7 @@ export default function OrganizerUploadForm({ formData }) {
             const encodedQuestions = web3.eth.abi.encodeParameters(
                 [
                     `string[${NO_OF_QUESTIONS}]`,
-                    `string[${NO_OF_QUESTIONS}][${NO_OF_OPTIONS}]`,
+                    `string[${NO_OF_OPTIONS}][${NO_OF_QUESTIONS}]`,
                     `bytes32`,
                 ],
                 [questions, options, hashSalt],
@@ -166,7 +166,8 @@ export default function OrganizerUploadForm({ formData }) {
             router.push('/organizer');
         }
         callContract();
-    }, [account, library, router, formData]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [account]);
 
     return (
         <>

@@ -3,7 +3,7 @@ pragma solidity >=0.8.10;
 
 contract QuizContract {
     uint8 constant noOfQuestions = 1;
-    uint8 constant noOfOptions = 1;
+    uint8 constant noOfOptions = 4;
 
     event QuizCreated(uint256 quizId, Quiz quiz);
 
@@ -12,7 +12,7 @@ contract QuizContract {
     event QuizStarted(
         uint256 quizId,
         string[noOfQuestions] questions,
-        string[noOfQuestions][noOfOptions] options
+        string[noOfOptions][noOfQuestions] options
     );
 
     event QuizCompleted(
@@ -70,7 +70,7 @@ contract QuizContract {
 
     function hashQuestions(
         string[noOfQuestions] calldata _questions,
-        string[noOfQuestions][noOfOptions] calldata _options,
+        string[noOfOptions][noOfQuestions] calldata _options,
         bytes32 _hashSalt
     ) internal pure returns (bytes32) {
         return keccak256(abi.encode(_questions, _options, _hashSalt));
@@ -154,10 +154,7 @@ contract QuizContract {
             startTime > block.timestamp,
             "Quiz cannot be created in the past"
         );
-        require(
-            startTime + duration > startTime,
-            "Quiz cannot be created with end time before start time"
-        );
+        require(duration > 0, "Duration of quiz cannot be zero");
         require(bytes(quizName).length != 0, "Quiz name cannot be empty");
         require(prizeMoney > 0, "Prize money cannot be zero");
         require(
@@ -212,7 +209,7 @@ contract QuizContract {
     function submitQuestions(
         uint256 _quizId,
         string[noOfQuestions] calldata _questions,
-        string[noOfQuestions][noOfOptions] calldata _options,
+        string[noOfOptions][noOfQuestions] calldata _options,
         bytes32 _hashSalt
     ) external onlyOwners(_quizId) {
         require(
