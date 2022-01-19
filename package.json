@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@openzeppelin/test-helpers": "^0.5.15",
+    "chai": "^4.3.4",
+    "faker": "5.0.0"
+  },
+  "devDependencies": {}
+}
