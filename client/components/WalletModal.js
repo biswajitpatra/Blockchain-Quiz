@@ -1,7 +1,7 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useState } from 'react';
 import { useWeb3React } from '@web3-react/core';
-import { injected } from '../components/connectors/injectedConnector';
+import { injected } from '@components/connectors/injectedConnector';
 
 export default function WalletModal({ required = true }) {
     const { account, activate, active, deactivate, error } = useWeb3React();

@@ -1,7 +1,7 @@
 import Web3 from 'web3';
-import { addQuizTask } from '../../../utils/cloudTasks';
-import authMiddleware from '../../../middlewares/auth';
-import { decodeQuizCreatedEvent } from '../../../utils/abiDecoder';
+import { addQuizTask } from '@utils/cloudTasks';
+import authMiddleware from '@middlewares/auth';
+import { decodeQuizCreatedEvent } from '@utils/abiDecoder';
 
 const handler = async (req, res) => {
     if (req.method !== 'POST')

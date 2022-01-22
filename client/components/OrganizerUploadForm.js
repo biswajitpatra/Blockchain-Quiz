@@ -5,10 +5,10 @@ import 'react-step-progress-bar/styles.css';
 import { ProgressBar, Step } from 'react-step-progress-bar';
 import Web3 from 'web3';
 import { useState, useEffect } from 'react';
-import getQuizContract from '../utils/getQuizContract';
+import { getQuizContract } from '@utils/quizContractUtils';
 import { useWeb3React } from '@web3-react/core';
 import WalletModal from './WalletModal';
-import { NO_OF_OPTIONS, NO_OF_QUESTIONS } from '../config.js';
+import { NO_OF_OPTIONS, NO_OF_QUESTIONS } from '../config';
 
 const ease = [0.43, 0.13, 0.23, 0.96];
 const stepVariants = {

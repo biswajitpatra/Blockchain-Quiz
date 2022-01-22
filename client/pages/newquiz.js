@@ -1,10 +1,10 @@
 import Head from 'next/head';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
-import QuizDetailForm from '../components/QuizDetailForm';
-import QuestionForm from '../components/QuestionForm';
-import OrganizerUploadForm from '../components/OrganizerUploadForm';
-import WalletModal from '../components/WalletModal';
+import QuizDetailForm from '@components/QuizDetailForm';
+import QuestionForm from '@components/QuestionForm';
+import OrganizerUploadForm from '@components/OrganizerUploadForm';
+import WalletModal from '@components/WalletModal';
 
 const ease = [0.43, 0.13, 0.23, 0.96];
 

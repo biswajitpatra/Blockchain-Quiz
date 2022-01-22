@@ -29,6 +29,15 @@ module.exports = {
         react: {
             version: 'detect',
         },
+        'import/resolver': {
+            alias: {
+                map: [
+                    ['@components', './components'],
+                    ['@utils', './utils'],
+                    ['@middlewares', './middlewares'],
+                ],
+            },
+        },
     },
     plugins: ['react', 'react-hooks', 'jsx-a11y'],
     rules: {

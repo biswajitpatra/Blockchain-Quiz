@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import WalletModal from '../components/WalletModal';
+import WalletModal from '@components/WalletModal';
 
 const ease = [0.43, 0.13, 0.23, 0.96];
 

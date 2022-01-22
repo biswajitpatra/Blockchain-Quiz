@@ -1,13 +1,15 @@
 import quizJSON from '../../build/contracts/QuizContract.json';
 
-const getQuizContract = async (web3) => {
+export const getQuizContractAddress = async (web3) => {
     const networkId = await web3.eth.net.getId();
     if (!quizJSON.networks[networkId])
         throw new Error(
             'Please change the blockchain network to suggested network',
         );
-    const contractAddress = quizJSON.networks[networkId].address;
+    return quizJSON.networks[networkId].address;
+}
+
+export const getQuizContract = async (web3) => {
+    const contractAddress = await getQuizContractAddress(web3);
     return new web3.eth.Contract(quizJSON.abi, contractAddress);
 };
-
-export default getQuizContract;

@@ -1,6 +1,8 @@
-import authMiddleware from '../../../../middlewares/auth';
-import quizJSON from '../../../../../build/contracts/QuizContract.json';
-import getQuizContract from '../../../../utils/getQuizContract';
+import authMiddleware from '@middlewares/auth';
+import {
+    getQuizContractAddress,
+    getQuizContract,
+} from '@utils/quizContractUtils';
 import Web3 from 'web3';
 
 const handler = async (req, res) => {
@@ -14,7 +16,7 @@ const handler = async (req, res) => {
     const web3 = new Web3(provider);
 
     const networkId = await web3.eth.net.getId();
-    const contractAddress = quizJSON.networks[networkId].address;
+    const contractAddress = await getQuizContractAddress(web3);
 
     const quizContract = await getQuizContract(web3);
     const tx = quizContract.methods.submitCorrectAnswers(

@@ -3,9 +3,9 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import Web3 from 'web3';
-import getQuizContract from '../utils/getQuizContract';
+import { getQuizContract } from '@utils/quizContractUtils';
 import { useWeb3React } from '@web3-react/core';
-import WalletModal from '../components/WalletModal';
+import WalletModal from '@components/WalletModal';
 
 const ease = [0.43, 0.13, 0.23, 0.96];
 
