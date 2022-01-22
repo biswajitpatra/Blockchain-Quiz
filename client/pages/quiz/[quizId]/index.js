@@ -100,6 +100,28 @@ export default function QuizDetails() {
         console.log(tx);
     };
 
+    const submitAnswers = async () => {
+        if (!account) {
+            return;
+        }
+        let answers = localStorage.getItem(`${quizId}-answers`);
+        const hashSalt = localStorage.getItem(`${quizId}-hashSalt`);
+
+        if (answers === null || hashSalt === null) {
+            // TODO: Show error and re fill the options
+            console.error('No answers found for this quizId');
+            return;
+        }
+        answers = JSON.parse(answers);
+
+        const web3 = new Web3(library);
+        const QuizContract = await getQuizContract(web3);
+        const tx = await QuizContract.methods
+            .submitCorrectAnswers(quizId, answers, hashSalt)
+            .send({ from: account });
+        console.log(tx);
+    };
+
     return (
         <>
             <WalletModal />
@@ -165,6 +187,7 @@ export default function QuizDetails() {
                                             Start Quiz
                                         </button>
                                         <button
+                                            onClick={submitAnswers}
                                             className="py-2 px-3 m-3 rounded-full bg-white border-blue-600 border-2 hover:bg-blue-600 hover:text-white hover:shadow-2xl transition duration-150 ease-in-out hover:scale-110 grow disabled:opacity-30 disabled:transform-none disabled:transition-none disabled:cursor-not-allowed"
                                             disabled={!quizDetails.isRunning}
                                         >
