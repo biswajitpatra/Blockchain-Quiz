@@ -61,9 +61,9 @@ export default function Organizer() {
         async function getQuizzes() {
             if (account) {
                 const web3 = new Web3(library);
-                const QuizContract = await getQuizContract(web3);
+                const quizContract = await getQuizContract(web3);
                 setQuizzes(
-                    await QuizContract.methods
+                    await quizContract.methods
                         .getQuizzesBy(account)
                         .call({ from: account }),
                 );

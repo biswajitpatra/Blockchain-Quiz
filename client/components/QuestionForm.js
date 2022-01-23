@@ -22,16 +22,33 @@ const stepVariants = {
     },
 };
 
-export default function QuestionForm({ updateFormData }) {
-    const initialQuestions = [];
-    const initialOptions = new Array(NO_OF_OPTIONS).fill('');
-    for (let i = 0; i < NO_OF_QUESTIONS; i++) {
-        initialQuestions.push({
+export default function QuestionForm({ updateFormData, quizId = null }) {
+    let initialQuestions;
+    let questions = localStorage.getItem(`${quizId}-questions`);
+    let options = localStorage.getItem(`${quizId}-options`);
+    let answers = localStorage.getItem(`${quizId}-answers`);
+
+    if (quizId && questions && options && answers) {
+        questions = JSON.parse(questions);
+        options = JSON.parse(options);
+        answers = JSON.parse(answers);
+
+        initialQuestions = questions.map((question, index) => {
+            return {
+                question,
+                options: options[index],
+                correctOption: answers[index],
+            };
+        });
+    } else {
+        const initialOptions = new Array(NO_OF_OPTIONS).fill('');
+        initialQuestions = new Array(NO_OF_QUESTIONS).fill({
             question: '',
             options: initialOptions,
             correctOption: null,
         });
     }
+
     const { handleSubmit, control, register } = useForm({
         defaultValues: {
             questions: initialQuestions,

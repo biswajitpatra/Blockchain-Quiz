@@ -85,11 +85,11 @@ contract QuizContract {
 
     function equalAnswers(
         uint8[noOfQuestions] storage correctOptions,
-        uint8[noOfQuestions] calldata optionsB
+        uint8[noOfQuestions] calldata options
     ) internal pure returns (bool) {
         return
             keccak256(abi.encode(correctOptions)) ==
-            keccak256(abi.encode(optionsB));
+            keccak256(abi.encode(options));
     }
 
     function getPendingQuizzes()
@@ -204,6 +204,8 @@ contract QuizContract {
         _quiz.quizOwner = _quizOwner;
         _quiz.questionHash = _questionHash;
         _quiz.answerHash = _answerHash;
+
+        emit QuizUpdated(_quizId, _quiz);
     }
 
     function submitQuestions(

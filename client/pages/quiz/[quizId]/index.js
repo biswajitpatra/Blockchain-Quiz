@@ -3,9 +3,9 @@ import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import Web3 from 'web3';
-import getQuizContract from '../../../utils/getQuizContract';
+import { getQuizContract } from '@utils/quizContractUtils';
 import { useWeb3React } from '@web3-react/core';
-import WalletModal from '../../../components/WalletModal';
+import WalletModal from '@components/WalletModal';
 
 const ease = [0.43, 0.13, 0.23, 0.96];
 
@@ -38,9 +38,9 @@ export default function QuizDetails() {
         async function fetchData() {
             if (account && quizId) {
                 const web3 = new Web3(library);
-                const QuizContract = await getQuizContract(web3);
+                const quizContract = await getQuizContract(web3);
                 setQuizDetails(
-                    await QuizContract.methods.quizzes(quizId).call(),
+                    await quizContract.methods.quizzes(quizId).call(),
                 );
             }
         }
@@ -82,8 +82,11 @@ export default function QuizDetails() {
         const hashSalt = localStorage.getItem(`${quizId}-hashSalt`);
 
         if (questions === null || options === null || hashSalt === null) {
-            // TODO: Show error and re fill the questions
-            console.error('No questions found for this quizId');
+            console.error('Error in fetching the data from localStorage');
+            alert(
+                'Unable to fetch answers from localStorage. So you need to refill the quiz details and update the quiz',
+            );
+            await updateQuiz();
             return;
         }
 
@@ -91,8 +94,8 @@ export default function QuizDetails() {
         options = JSON.parse(options);
 
         const web3 = new Web3(library);
-        const QuizContract = await getQuizContract(web3);
-        const tx = await QuizContract.methods
+        const quizContract = await getQuizContract(web3);
+        const tx = await quizContract.methods
             .submitQuestions(quizId, questions, options, hashSalt)
             .send({
                 from: account,
@@ -108,18 +111,25 @@ export default function QuizDetails() {
         const hashSalt = localStorage.getItem(`${quizId}-hashSalt`);
 
         if (answers === null || hashSalt === null) {
-            // TODO: Show error and re fill the options
-            console.error('No answers found for this quizId');
+            console.error('Unable to fetch answers from localStorage');
+            alert('Unable to fetch answers from localStorage');
             return;
         }
         answers = JSON.parse(answers);
 
         const web3 = new Web3(library);
-        const QuizContract = await getQuizContract(web3);
-        const tx = await QuizContract.methods
+        const quizContract = await getQuizContract(web3);
+        const tx = await quizContract.methods
             .submitCorrectAnswers(quizId, answers, hashSalt)
             .send({ from: account });
         console.log(tx);
+    };
+
+    const updateQuiz = async () => {
+        if (!account) {
+            return;
+        }
+        router.push(`/quiz/${quizId}/update`);
     };
 
     return (
@@ -194,6 +204,7 @@ export default function QuizDetails() {
                                             Submit Answers
                                         </button>
                                         <button
+                                            onClick={updateQuiz}
                                             className="py-2 px-3 m-3 rounded-full bg-white border-blue-600 border-2 hover:bg-blue-600 hover:text-white hover:shadow-2xl transition duration-150 ease-in-out hover:scale-110 grow disabled:opacity-30 disabled:transform-none disabled:transition-none disabled:cursor-not-allowed"
                                             disabled={quizDetails.isRunning}
                                         >
@@ -203,7 +214,7 @@ export default function QuizDetails() {
                                 )}
                                 <button
                                     className="py-2 px-3 m-3 rounded-full bg-white border-blue-600 border-2 hover:bg-blue-600 hover:text-white hover:shadow-2xl transition duration-150 ease-in-out hover:scale-110 basis-full disabled:opacity-30 disabled:transform-none disabled:transition-none disabled:cursor-not-allowed"
-                                    disabled={!quizDetails.isRunning}
+                                    disabled={quizDetails.isRunning}
                                 >
                                     Play Quiz
                                 </button>

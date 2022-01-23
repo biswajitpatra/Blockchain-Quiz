@@ -7,7 +7,6 @@ import Web3 from 'web3';
 import { useState, useEffect } from 'react';
 import { getQuizContract } from '@utils/quizContractUtils';
 import { useWeb3React } from '@web3-react/core';
-import WalletModal from './WalletModal';
 import { NO_OF_OPTIONS, NO_OF_QUESTIONS } from '../config';
 
 const ease = [0.43, 0.13, 0.23, 0.96];
@@ -29,7 +28,7 @@ const stepVariants = {
     },
 };
 
-export default function OrganizerUploadForm({ formData }) {
+export default function OrganizerUploadForm({ formData, quizId }) {
     const router = useRouter();
     const [progress, setProgress] = useState(0);
     const [message, setMessage] = useState('');
@@ -59,7 +58,7 @@ export default function OrganizerUploadForm({ formData }) {
             }
 
             const web3 = new Web3(library);
-            const QuizContract = await getQuizContract(web3);
+            const quizContract = await getQuizContract(web3);
             let questions = [];
             let options = [];
             let answers = [];
@@ -86,37 +85,68 @@ export default function OrganizerUploadForm({ formData }) {
             );
 
             let isSuccess;
-
-            let receipt = await QuizContract.methods
-                .createQuiz(
-                    formData.quizName,
-                    formData.description,
-                    formData.prizeMoney,
-                    Math.floor(formData.startTime / 1000),
-                    formData.duration * 60,
-                    web3.utils.keccak256(encodedQuestions),
-                    web3.utils.keccak256(encodedAnswers),
-                )
-                .send({ from: account, value: formData.prizeMoney })
-                .on('sending', () => {
-                    setMessage('Signing transaction...');
-                    updateProgress(1);
-                })
-                .on('transactionHash', (hash) => {
-                    setMessage(`Transaction hash: ${hash}`);
-                    updateProgress(2);
-                })
-                .on('receipt', (receipt) => {
-                    isSuccess = true;
-                    setMessage('Quiz added to contracts');
-                    console.log(receipt);
-                    updateProgress(3);
-                })
-                .on('error', (error, receipt) => {
-                    isSuccess = false;
-                    console.log(error, receipt);
-                    setMessage(error.message);
-                });
+            let receipt;
+            if (!quizId) {
+                receipt = await quizContract.methods
+                    .createQuiz(
+                        formData.quizName,
+                        formData.description,
+                        formData.prizeMoney,
+                        Math.floor(formData.startTime / 1000),
+                        formData.duration * 60,
+                        web3.utils.keccak256(encodedQuestions),
+                        web3.utils.keccak256(encodedAnswers),
+                    )
+                    .send({ from: account, value: formData.prizeMoney })
+                    .on('sending', () => {
+                        setMessage('Signing transaction...');
+                        updateProgress(1);
+                    })
+                    .on('transactionHash', (hash) => {
+                        setMessage(`Transaction hash: ${hash}`);
+                        updateProgress(2);
+                    })
+                    .on('receipt', (receipt) => {
+                        isSuccess = true;
+                        setMessage('Quiz added to contracts');
+                        console.log(receipt);
+                        updateProgress(3);
+                    })
+                    .on('error', (error, receipt) => {
+                        isSuccess = false;
+                        console.log(error, receipt);
+                        setMessage(error.message);
+                    });
+            } else {
+                receipt = await quizContract.methods
+                    .updateQuiz(
+                        quizId,
+                        formData.description,
+                        account,
+                        web3.utils.keccak256(encodedQuestions),
+                        web3.utils.keccak256(encodedAnswers),
+                    )
+                    .send({ from: account })
+                    .on('sending', () => {
+                        setMessage('Signing transaction...');
+                        updateProgress(1);
+                    })
+                    .on('transactionHash', (hash) => {
+                        setMessage(`Transaction hash: ${hash}`);
+                        updateProgress(2);
+                    })
+                    .on('receipt', (receipt) => {
+                        isSuccess = true;
+                        setMessage('Quiz added to contracts');
+                        console.log(receipt);
+                        updateProgress(3);
+                    })
+                    .on('error', (error, receipt) => {
+                        isSuccess = false;
+                        console.log(error, receipt);
+                        setMessage(error.message);
+                    });
+            }
 
             if (!isSuccess) {
                 return;
@@ -136,6 +166,7 @@ export default function OrganizerUploadForm({ formData }) {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
+                        isUpdated: quizId ? true : false,
                         transactionHash: receipt.transactionHash,
                         signedToken,
                         questions,
@@ -151,14 +182,24 @@ export default function OrganizerUploadForm({ formData }) {
                     return;
                 }
             }
-            const quizId = receipt.events.QuizCreated.returnValues.quizId;
+
+            let storeQuizId = quizId
+                ? quizId
+                : receipt.events.QuizCreated.returnValues.quizId;
+
             localStorage.setItem(
-                `${quizId}-questions`,
+                `${storeQuizId}-questions`,
                 JSON.stringify(questions),
             );
-            localStorage.setItem(`${quizId}-options`, JSON.stringify(options));
-            localStorage.setItem(`${quizId}-answers`, JSON.stringify(answers));
-            localStorage.setItem(`${quizId}-hashSalt`, hashSalt);
+            localStorage.setItem(
+                `${storeQuizId}-options`,
+                JSON.stringify(options),
+            );
+            localStorage.setItem(
+                `${storeQuizId}-answers`,
+                JSON.stringify(answers),
+            );
+            localStorage.setItem(`${storeQuizId}-hashSalt`, hashSalt);
 
             updateProgress(5);
             setMessage('Quiz created successfully');
@@ -171,7 +212,6 @@ export default function OrganizerUploadForm({ formData }) {
 
     return (
         <>
-            <WalletModal />
             <motion.div variants={stepVariants} className="my-16">
                 <div className="my-10 font-bold text-xl">{message}</div>
                 <ProgressBar

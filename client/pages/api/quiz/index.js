@@ -1,13 +1,17 @@
 import Web3 from 'web3';
 import { addQuizTask } from '@utils/cloudTasks';
 import authMiddleware from '@middlewares/auth';
-import { decodeQuizCreatedEvent } from '@utils/abiDecoder';
+import {
+    decodeQuizCreatedEvent,
+    decodeQuizUpdatedEvent,
+} from '@utils/abiDecoder';
 
 const handler = async (req, res) => {
     if (req.method !== 'POST')
         return res.status(405).json({ error: 'Method not allowed' });
 
     const {
+        isUpdated,
         transactionHash,
         signedToken,
         questions,
@@ -22,7 +26,10 @@ const handler = async (req, res) => {
         transactionHash,
     );
 
-    const decodedLogs = decodeQuizCreatedEvent(transactionReceipt.logs[0]);
+    let decodedLogs;
+    if (isUpdated)
+        decodedLogs = decodeQuizCreatedEvent(transactionReceipt.logs[0]);
+    else decodedLogs = decodeQuizUpdatedEvent(transactionReceipt.logs[0]);
 
     await addQuizTask(
         transactionHash,

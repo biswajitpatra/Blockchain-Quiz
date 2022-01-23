@@ -1,5 +1,9 @@
 import { Controller, useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
+import { getQuizContract } from '@utils/quizContractUtils';
+import { useWeb3React } from '@web3-react/core';
+import { useEffect } from 'react';
+import Web3 from 'web3';
 
 import DateTimePicker from 'react-datetime-picker/dist/entry.nostyle';
 import 'react-calendar/dist/Calendar.css';
@@ -26,13 +30,34 @@ const stepVariants = {
     },
 };
 
-export default function QuizDetailForm({ updateFormData }) {
+export default function QuizDetailForm({ updateFormData, quizId = null }) {
+    const { account, library } = useWeb3React();
     const {
         control,
         register,
         handleSubmit,
+        reset,
         formState: { errors },
     } = useForm();
+
+    useEffect(() => {
+        async function fetchQuiz() {
+            if (quizId && account) {
+                const web3 = new Web3(library);
+                const quizContract = await getQuizContract(web3);
+                const quizDetails = await quizContract.methods
+                    .quizzes(quizId)
+                    .call();
+
+                // For converting quiz details to form data
+                quizDetails.startTime = quizDetails.startTime * 1000;
+                quizDetails.duration = quizDetails.duration / 60;
+
+                reset(quizDetails);
+            }
+        }
+        fetchQuiz();
+    }, [quizId, account, library, reset]);
 
     return (
         <motion.div
@@ -50,6 +75,7 @@ export default function QuizDetailForm({ updateFormData }) {
                     <input
                         {...register('quizName')}
                         required
+                        disabled={quizId}
                         className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                         type="text"
                         placeholder="Some amazing name for your quiz"
@@ -66,6 +92,7 @@ export default function QuizDetailForm({ updateFormData }) {
                     <input
                         {...register('prizeMoney', { valueAsNumber: true })}
                         required
+                        disabled={quizId}
                         className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                         type="number"
                         min="0"
@@ -109,6 +136,7 @@ export default function QuizDetailForm({ updateFormData }) {
                             return (
                                 <DateTimePicker
                                     required
+                                    disabled={quizId}
                                     amPmAriaLabel="Select AM/PM"
                                     calendarAriaLabel="Toggle calendar"
                                     clearIcon={null}
@@ -147,6 +175,7 @@ export default function QuizDetailForm({ updateFormData }) {
                     <input
                         {...register('duration', { valueAsNumber: true })}
                         required
+                        disabled={quizId}
                         className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                         type="number"
                         min="1"
